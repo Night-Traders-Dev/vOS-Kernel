@@ -18,7 +18,8 @@ _start:
     cmp w2, #0                 /* Check if null byte */
     b.eq boot_kernel           /* If null byte, finish and jump to kernel */                                                                                                                                                      /* Direct UART Output */
     mov x3, #0x09000000        /* UART base address for QEMU virt machine */
-    strb w2, [x3]              /* Write the byte to UART */                   b 1b                       /* Loop until string is printed */
+    strb w2, [x3]              /* Write the byte to UART */
+    b 1b                       /* Loop until string is printed */
 
 boot_kernel:
     /* Jump to the kernel entry point */

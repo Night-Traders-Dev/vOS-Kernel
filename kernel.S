@@ -1,5 +1,6 @@
 /* kernel.S */
-.section .text                                                            .global kernel_entry
+.section .text                                                            
+.global kernel_entry
 
 /* Interrupt Vector Table for ARM64 */
 .align 11                    /* Align to 2KB (required by ARM) */

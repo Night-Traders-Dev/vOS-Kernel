@@ -11,7 +11,10 @@ _start:
     ldr x0, =hello_str
 
     /* Write the string to the UART (serial output) */
-1:                                                                            ldrb w2, [x0], #1          /* Load a byte from the string */
+1:
+                                                            
+
+    ldrb w2, [x0], #1          /* Load a byte from the string */
     cmp w2, #0                 /* Check if null byte */
     b.eq boot_kernel           /* If null byte, finish and jump to kernel */                                                                                                                                                      /* Direct UART Output */
     mov x3, #0x09000000        /* UART base address for QEMU virt machine */

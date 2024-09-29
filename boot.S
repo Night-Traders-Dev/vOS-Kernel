@@ -4,9 +4,11 @@
                                                                           /* Start of the bootloader */
 _start:
     /* Set up the stack pointer */
-    ldr x0, =stack_top                                                        mov sp, x0
+    ldr x0, =stack_top                                              
+    mov sp, x0
 
-    /* Load the base address of the string into x0 */                         ldr x0, =hello_str
+    /* Load the base address of the string into x0 */
+    ldr x0, =hello_str
 
     /* Write the string to the UART (serial output) */
 1:                                                                            ldrb w2, [x0], #1          /* Load a byte from the string */

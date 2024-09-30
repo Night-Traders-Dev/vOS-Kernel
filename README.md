@@ -42,11 +42,8 @@ This script will assemble and link the bootloader and kernel code, producing the
 
 Running the Kernel
 
-Once you have built the project, you can run it in QEMU with the following command:
+Once you have built the project, the build script will automatically run QEMU.
 
-qemu-system-aarch64 -machine virt -cpu cortex-a53 -nographic -drive file=boot.elf,if=virtio
-
-This command runs QEMU with a virtual ARM64 machine, displaying the output directly in the terminal.
 
 Kernel Architecture
 

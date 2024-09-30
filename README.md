@@ -31,7 +31,7 @@ You can install these on Ubuntu/Debian with the following command:
 ```bash
 sudo apt update
 sudo apt install qemu aarch64-linux-gnu-gcc aarch64-linux-gnu-binutils
-
+```
 Building the Project
 
 To build the kernel and bootloader, run the following command in the project directory:

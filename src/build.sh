@@ -27,7 +27,7 @@ build() {
     echo "Running QEMU..."
 
     # Run the combined ELF in QEMU
-    qemu-system-aarch64 -M virt -cpu cortex-a53 -nographic -serial mon:stdio -kernel boot.elf
+    qemu-system-aarch64 -M virt -cpu cortex-a53 -nographic -semihosting -serial mon:stdio -kernel boot.elf
 }
 
 # Check for arguments

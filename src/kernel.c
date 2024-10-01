@@ -6,6 +6,7 @@
 #define UART_DR   (*(volatile uint32_t *) (UART_BASE + 0x00))  // Data register
 #define UART_FR   (*(volatile uint32_t *) (UART_BASE + 0x18))  // Flag register
 #define QEMU_EXIT_PORT 0x501
+#define QEMU_SHUTDOWN_PORT 0x604
 
 // Function prototypes
 void print_string(const char *str);
@@ -30,8 +31,9 @@ void kernel_entry(void) {
 
         // Check if the command is "exit"
         if (strcmp(buffer, "exit") == 0) {
-            print_string("[kernel]Shutting down...\n");
+            print_string("[shell]Exit detected...\n");
             qemu_shutdown();  // Exit QEMU
+            break;
         }
 
         print_string("[kernel]Unrecognized command...\n");
@@ -94,6 +96,9 @@ int strcmp(const char *str1, const char *str2) {
 
 // Function to trigger QEMU shutdown
 void qemu_shutdown(void) {
-    // Use the QEMU exit port to trigger shutdown
-    *(volatile uint32_t *)0x500 = 0; // Use port 0x500 to signal shutdown
+    print_string("[kernel]vOS Kernel Shutdown...\n");
+    // Use port 0x501 and 0x604 to signal shutdown
+    *(volatile uint32_t *)0x501 = 0x31;
+    *(volatile uint32_t *)0x604 = 0;
 }
+

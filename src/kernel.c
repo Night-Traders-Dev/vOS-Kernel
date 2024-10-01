@@ -10,29 +10,28 @@ void print_string(const char *str);
 void kernel_entry(void);
 char uart_read_char(void);
 void uart_read_string(char *buffer, int max_length);
-bool string_compare(const char *str1, const char *str2);
 int strcmp(const char *str1, const char *str2);
 
 // Kernel entry point
 void kernel_entry(void) {
-    char buffer[128];  // Declare the buffer for reading input
+    char buffer[128];  // Buffer for storing the user input
 
     // Print a message indicating the kernel is running
-    print_string("Kernel initialized. Type 'exit' to shut down.\n");
+    print_string("[kernel]Kernel initialized.\n");
 
     // Main kernel loop to capture input
     while (1) {
-        print_string("Enter a command: ");
-
-        uart_read_string(buffer, 128);  // Read input from UART
+        print_string("$");
+        
+        uart_read_string(buffer, 128);  // Wait until Enter is pressed
 
         // Check if the command is "exit"
         if (strcmp(buffer, "exit") == 0) {
-            print_string("Shutting down...\n");
+            print_string("[kernel]Shutting down...\n");
             break;  // Exit the main loop to shut down the kernel
         }
 
-        print_string("Unrecognized command. Type 'exit' to shut down.\n");
+        print_string("[kernel]Unrecognized command...\n");
     }
 }
 
@@ -52,7 +51,7 @@ char uart_read_char(void) {
     return c;
 }
 
-// Function to read a string from UART
+// Function to read a string from UART, waits for Enter key
 void uart_read_string(char *buffer, int max_length) {
     int i = 0;
     char c;
@@ -62,7 +61,8 @@ void uart_read_string(char *buffer, int max_length) {
         c = uart_read_char();  // Get a character from UART
 
         if (c == '\r' || c == '\n') {  // If Enter is pressed (carriage return or newline)
-            print_string("\n");        // Echo the newline to UART for user feedback
+            buffer[i] = '\0';          // Null-terminate the buffer and exit
+            print_string("\n");        // Echo newline for visual feedback
             break;
         }
 
@@ -75,7 +75,7 @@ void uart_read_string(char *buffer, int max_length) {
         }
     }
 
-    buffer[i] = '\0';  // Null-terminate the string
+    buffer[i] = '\0';  // Null-terminate the string just in case
 }
 
 // Custom strcmp implementation
@@ -85,16 +85,4 @@ int strcmp(const char *str1, const char *str2) {
         str2++;
     }
     return *(unsigned char *)str1 - *(unsigned char *)str2;
-}
-
-// Function to compare two strings (not used, but kept here in case needed)
-bool string_compare(const char *str1, const char *str2) {
-    while (*str1 && *str2) {
-        if (*str1 != *str2) {
-            return false;
-        }
-        str1++;
-        str2++;
-    }
-    return *str1 == *str2;
 }

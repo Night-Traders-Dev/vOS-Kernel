@@ -4,6 +4,7 @@
 
 #define UART_BASE 0x09000000    // UART base address for QEMU's virt machine
 #define UART_DR   (*(volatile uint32_t *) (UART_BASE + 0x00))  // Data register
+#define UART_FR   (*(volatile uint32_t *) (UART_BASE + 0x18))  // Flag register
 
 // Function prototypes
 void print_string(const char *str);
@@ -22,7 +23,7 @@ void kernel_entry(void) {
     // Main kernel loop to capture input
     while (1) {
         print_string("$");
-        
+
         uart_read_string(buffer, 128);  // Wait until Enter is pressed
 
         // Check if the command is "exit"
@@ -38,6 +39,7 @@ void kernel_entry(void) {
 // Function to print a string to UART
 void print_string(const char *str) {
     while (*str) {
+        while (UART_FR & (1 << 5)) {} // Wait if UART is busy
         UART_DR = *str++;  // Output each character to UART
     }
 }
@@ -46,6 +48,7 @@ void print_string(const char *str) {
 char uart_read_char(void) {
     char c;
     do {
+        while (UART_FR & (1 << 4)) {} // Wait for UART to have received data
         c = (char) UART_DR;
     } while (c == 0);  // Wait until data is available
     return c;

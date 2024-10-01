@@ -9,10 +9,10 @@ _start:
     mov sp, x0
 
     /* Load the base address of the string into x0 */
-    ldr x0, =hello_str
+    ldr x0, =boot_msg
 
     /* Write the string to the UART (serial output) */
-print_hello:
+print_boot_msg:
     ldrb w2, [x0], #1          /* Load a byte from the string */
     cmp w2, #0                 /* Check if null byte */
     b.eq boot_kernel           /* If null byte, finish and jump to kernel */
@@ -20,7 +20,7 @@ print_hello:
     /* Direct UART Output */
     mov x3, #0x09000000        /* UART base address for QEMU virt machine */
     strb w2, [x3]              /* Write the byte to UART */
-    b print_hello              /* Loop until string is printed */
+    b print_boot_msg              /* Loop until string is printed */
 
 boot_kernel:
     /* Print a message before jumping to kernel */
@@ -49,7 +49,7 @@ print_done:
 
 /* Data section */
 .section .data
-hello_str:
+boot_msg:
     .ascii "[bootloader]Boot init completed\n"    /* The string to print */
 
 jump_to_kernel_str:

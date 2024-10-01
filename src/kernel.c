@@ -5,6 +5,7 @@
 #define UART_BASE 0x09000000    // UART base address for QEMU's virt machine
 #define UART_DR   (*(volatile uint32_t *) (UART_BASE + 0x00))  // Data register
 #define UART_FR   (*(volatile uint32_t *) (UART_BASE + 0x18))  // Flag register
+#define QEMU_EXIT_PORT 0x501
 
 // Function prototypes
 void print_string(const char *str);
@@ -12,6 +13,7 @@ void kernel_entry(void);
 char uart_read_char(void);
 void uart_read_string(char *buffer, int max_length);
 int strcmp(const char *str1, const char *str2);
+void qemu_shutdown(void);
 
 // Kernel entry point
 void kernel_entry(void) {
@@ -29,7 +31,7 @@ void kernel_entry(void) {
         // Check if the command is "exit"
         if (strcmp(buffer, "exit") == 0) {
             print_string("[kernel]Shutting down...\n");
-            break;  // Exit the main loop to shut down the kernel
+            qemu_shutdown();  // Exit QEMU
         }
 
         print_string("[kernel]Unrecognized command...\n");
@@ -88,4 +90,10 @@ int strcmp(const char *str1, const char *str2) {
         str2++;
     }
     return *(unsigned char *)str1 - *(unsigned char *)str2;
+}
+
+// Function to trigger QEMU shutdown
+void qemu_shutdown(void) {
+    // Use the QEMU exit port to trigger shutdown
+    *(volatile uint32_t *)0x500 = 0; // Use port 0x500 to signal shutdown
 }

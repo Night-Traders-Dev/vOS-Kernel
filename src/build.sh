@@ -34,9 +34,14 @@ build() {
 if [ "$1" == "clean" ]; then
     clean
     exit 0
+elif [ "$1" == "build" ]; then
+    build
 elif [ "$1" == "cleanbuild" ]; then
     clean
     build
 else
-    build
+    printf "build.sh usage...\n\n"
+    echo "'./build.sh build' to build vOS-Kernel"
+    echo "'./build.sh clean' to remove old executables"
+    echo "'./build.sh cleanbuild' to remove old executables and build vOS-Kernel"
 fi

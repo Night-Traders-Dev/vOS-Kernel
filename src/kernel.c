@@ -21,7 +21,8 @@ void kernel_entry(void) {
     print_string("[kernel]Kernel init completed\n");
 
     // Set up the interrupt vector table
-    asm volatile("msr vbar_el1, %0" : : "r" (vectors));  // Set Vector Base Address Register to vector table
+    asm volatile("msr vbar_el1, %0" : : "r" (vectors));
+//    asm volatile("msr vbar_el1, %0" : : "r" (vectors));  // Set Vector Base Address Register to vector table
 
     // Unmask IRQ interrupts (needed for Ctrl+C)
     asm volatile("msr daifclr, #0b10");  // Unmask IRQ only, keep FIQ and Error masked

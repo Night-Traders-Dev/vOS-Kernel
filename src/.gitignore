@@ -1,0 +1,4 @@
+*.elf
+boot.o
+kernel.o
+*.bak

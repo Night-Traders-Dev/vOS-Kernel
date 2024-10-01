@@ -1,33 +1,27 @@
-/* kernel.ld */
-ENTRY(_start)               /* Define the entry point, which is _start in boot.S */
+ENTRY(_start)
 
 SECTIONS
 {
-    /* Start the program at address 0x40000, typical for QEMU's virt machine */
-    . = 0x40000;
-
-    /* Text section for executable code */
+    . = 0x40000000;  /* Kernel entry address */
+    
     .text : {
-        *(.text)            /* All text (code) sections from object files */
+        *(.text*)   /* All .text sections (code) */
     }
 
-    /* Data section for initialized global/static variables */
+    .rodata : {
+        *(.rodata*) /* Read-only data */
+    }
+
     .data : {
-        *(.data)            /* All data sections */
+        *(.data*)   /* Data sections */
     }
 
-    /* BSS section for uninitialized global/static variables */
     .bss : {
-        *(.bss COMMON)      /* All bss and common sections */
-        . = ALIGN(16);      /* Ensure 16-byte alignment for the stack */
+        *(.bss*)    /* BSS (zero-initialized) sections */
     }
 
-    /* Stack */
-    . = ALIGN(16);
-    .stack (NOLOAD) : {
-        *(.stack)           /* All stack segments */
+    /DISCARD/ : {
+        *(.comment)
+        *(.note)
     }
-
-    /* Define the top of the kernel stack */
-    PROVIDE(kernel_stack_top = .);
 }

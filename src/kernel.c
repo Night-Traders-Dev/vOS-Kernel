@@ -14,7 +14,7 @@ void kernel_entry(void);
 char uart_read_char(void);
 void uart_read_string(char *buffer, int max_length);
 int strcmp(const char *str1, const char *str2);
-void qemu_shutdown(void);
+void system_off(void);
 
 // Kernel entry point
 void kernel_entry(void) {
@@ -25,14 +25,15 @@ void kernel_entry(void) {
 
     // Main kernel loop to capture input
     while (1) {
-        print_string("$");
+        print_string("$ ");
 
         uart_read_string(buffer, 128);  // Wait until Enter is pressed
 
         // Check if the command is "exit"
         if (strcmp(buffer, "exit") == 0) {
             print_string("[shell]Exit detected...\n");
-            qemu_shutdown();  // Exit QEMU
+            //qemu_shutdown();  // Exit QEMU
+            system_off();
             break;
         }
 
@@ -94,11 +95,11 @@ int strcmp(const char *str1, const char *str2) {
     return *(unsigned char *)str1 - *(unsigned char *)str2;
 }
 
-// Function to trigger QEMU shutdown
-void qemu_shutdown(void) {
-    print_string("[kernel]vOS Kernel Shutdown...\n");
-    // Use port 0x501 and 0x604 to signal shutdown
-    *(volatile uint32_t *)0x501 = 0x31;
-    *(volatile uint32_t *)0x604 = 0;
-}
-
+//qemu shutdown
+void system_off(void)
+    {
+        print_string("[kernel]vOS Kernel Shutdown...\n");
+        register const uint64_t function_id asm( "x0" ) = 0x84000008;
+        asm volatile( "hvc #0" :: "r"(function_id) );
+        while( 1 ) asm( "" );
+    }

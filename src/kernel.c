@@ -1,6 +1,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include "command_handler.h"
+#include "kernel.h"
 
 #define UART_BASE 0x09000000    // UART base address for QEMU's virt machine
 #define UART_DR   (*(volatile uint32_t *) (UART_BASE + 0x00))  // Data register
@@ -14,13 +16,14 @@ char uart_read_char(void);
 void uart_read_string(char *buffer, int max_length);
 int strcmp(const char *str1, const char *str2);
 void system_off(void);
+void handle_command(const char *command);
 
 // Kernel entry point
 void kernel_entry(void) {
     char buffer[128];  // Buffer for storing the user input
 
     // Print a message indicating the kernel is running
-    print_string("[kernel]Kernel initialized.\n");
+    print_string("[kernel] Kernel initialized.\n");
 
     // Main kernel loop to capture input
     while (1) {
@@ -28,15 +31,7 @@ void kernel_entry(void) {
 
         uart_read_string(buffer, 128);  // Wait until Enter is pressed
 
-        // Check if the command is "exit"
-        if (strcmp(buffer, "exit") == 0) {
-            print_string("[shell]Exit detected...\n");
-            //qemu_shutdown();  // Exit QEMU
-            system_off();
-            break;
-        }
-
-        print_string("[kernel]Unrecognized command...\n");
+        handle_command(buffer);  // Process the command using handle_command
     }
 }
 
@@ -94,11 +89,10 @@ int strcmp(const char *str1, const char *str2) {
     return *(unsigned char *)str1 - *(unsigned char *)str2;
 }
 
-//qemu shutdown
-void system_off(void)
-    {
-        print_string("[kernel]vOS Kernel Shutdown...\n");
-        register const uint64_t function_id asm( "x0" ) = QEMU_SHUTDOWN_PORT;//0x84000008;
-        asm volatile( "hvc #0" :: "r"(function_id) );
-        while( 1 ) asm( "" );
-    }
+// Function to shut down QEMU (via hypervisor call)
+void system_off(void) {
+    print_string("[kernel] vOS Kernel Shutdown...\n");
+    register const uint64_t function_id asm("x0") = QEMU_SHUTDOWN_PORT;
+    asm volatile("hvc #0" :: "r"(function_id));
+    while (1) asm("");
+}

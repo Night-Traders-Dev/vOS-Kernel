@@ -5,7 +5,7 @@ build_dir = "../build/"
 # Function to clean the build artifacts
 clean() {
     echo "Cleaning build files..."
-    rm -f boot.o kernel.o
+    rm -f boot.o kernel.o command_handler.o
     echo "Clean complete."
 }
 
@@ -31,12 +31,14 @@ build() {
     else
         echo "Building standard BIOS bootloader..."
 
+        aarch64-linux-gnu-gcc -c -o command_handler.o command_handler.c -ffreestanding -nostdlib
+
         # Assemble standard bootloader
         aarch64-linux-gnu-as -o boot.o boot.S
         echo "Linking bootloader and kernel..."
 
         # Link bootloader and kernel into a single ELF
-        aarch64-linux-gnu-ld -T kernel.ld -o "$boot_dir"boot.elf boot.o kernel.o
+        aarch64-linux-gnu-ld -T kernel.ld -o "$boot_dir"boot.elf boot.o kernel.o command_handler.o
     fi
 
     run_qemu

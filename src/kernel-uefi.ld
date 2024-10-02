@@ -1,5 +1,4 @@
 ENTRY(efi_main)
-
 SECTIONS
 {
     . = 0x40000000;  /* Kernel entry address */
@@ -25,3 +24,4 @@ SECTIONS
         *(.note)
     }
 }
+

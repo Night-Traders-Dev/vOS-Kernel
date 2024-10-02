@@ -1,9 +1,11 @@
 #!/bin/bash
 
+build_dir = "../build/"
+
 # Function to clean the build artifacts
 clean() {
     echo "Cleaning build files..."
-    rm -f boot.o kernel.o boot.elf
+    rm -f boot.o kernel.o #boot.elf
     echo "Clean complete."
 }
 
@@ -24,7 +26,7 @@ build() {
         echo "Linking UEFI bootloader with required libraries..."
 
         # Link UEFI bootloader with libraries
-        aarch64-linux-gnu-gcc -o boot.elf boot.o kernel.o -nostdlib -T kernel-uefi.ld \
+        aarch64-linux-gnu-gcc -o "$boot_dir"boot.elf boot.o kernel.o -nostdlib -T kernel-uefi.ld \
             -L/usr/local/lib -l:libefi.a -l:libgnuefi.a
     else
         echo "Building standard BIOS bootloader..."
@@ -34,7 +36,7 @@ build() {
         echo "Linking bootloader and kernel..."
 
         # Link bootloader and kernel into a single ELF
-        aarch64-linux-gnu-ld -T kernel.ld -o boot.elf boot.o kernel.o
+        aarch64-linux-gnu-ld -T kernel.ld -o "$boot_dir"boot.elf boot.o kernel.o
     fi
 
     run_qemu
@@ -42,7 +44,7 @@ build() {
 
 run_qemu() {
     echo "Running QEMU..."
-    qemu-system-aarch64 -M virt -cpu cortex-a53 -nographic -semihosting -serial mon:stdio -kernel boot.elf
+    qemu-system-aarch64 -M virt -cpu cortex-a53 -nographic -semihosting -serial mon:stdio -kernel "$boot_dir"boot.elf
 }
 
 # Check for arguments

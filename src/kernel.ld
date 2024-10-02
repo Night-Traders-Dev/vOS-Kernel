@@ -12,10 +12,9 @@ SECTIONS
         *(.rodata*) /* Read-only data */
     }
 
-    .data : {
+      .data : {
         *(.data*)   /* Data sections */
     }
-
     .bss : {
         *(.bss*)    /* BSS (zero-initialized) sections */
     }

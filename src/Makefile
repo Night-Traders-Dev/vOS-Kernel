@@ -18,12 +18,12 @@ all: build
 
 clean:
 	@echo "Cleaning build files..."
-	rm -f $(BOOT_DIR)/boot.o $(LIB_DIR)/kernel.o $(LIB_DIR)/command_handler.o boot.elf $(BUILD_DIR)/boot.elf
+	rm -f $(BOOT_DIR)/boot.o $(LIB_DIR)/kernel.o $(LIB_DIR)/command_handler.o $(LIB_DIR)/syscalls.o boot.elf $(BUILD_DIR)/boot.elf
 	@echo "Clean complete."
 
-build: $(LIB_DIR)/kernel.o $(LIB_DIR)/command_handler.o $(BOOT_DIR)/boot.o
+build: $(LIB_DIR)/kernel.o $(LIB_DIR)/command_handler.o $(LIB_DIR)/syscalls.o $(BOOT_DIR)/boot.o
 	@echo "Linking bootloader and kernel..."
-	$(LD) -T kernel.ld -o $(BUILD_DIR)/boot.elf $(BOOT_DIR)/boot.o $(LIB_DIR)/kernel.o $(LIB_DIR)/command_handler.o
+	$(LD) -T kernel.ld -o $(BUILD_DIR)/boot.elf $(BOOT_DIR)/boot.o $(LIB_DIR)/kernel.o $(LIB_DIR)/command_handler.o $(LIB_DIR)/syscalls.o
 	@echo "Build complete."
 
 build_uefi: $(LIB_DIR)/kernel.o $(BOOT_DIR)/uefi-boot.o
@@ -36,6 +36,9 @@ $(LIB_DIR)/kernel.o: $(LIB_DIR)/kernel.c
 
 $(LIB_DIR)/command_handler.o: $(LIB_DIR)/command_handler.c
 	$(CC) -c -o $(LIB_DIR)/command_handler.o $(LIB_DIR)/command_handler.c $(CFLAGS)
+
+$(LIB_DIR)/syscalls.o: $(LIB_DIR)/syscalls.c
+	$(CC) -c -o $(LIB_DIR)/syscalls.o $(LIB_DIR)/syscalls.c $(CFLAGS)
 
 $(BOOT_DIR)/boot.o: $(BOOT_DIR)/boot.S
 	$(AS) -o $(BOOT_DIR)/boot.o $(BOOT_DIR)/boot.S

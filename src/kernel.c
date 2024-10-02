@@ -5,8 +5,7 @@
 #define UART_BASE 0x09000000    // UART base address for QEMU's virt machine
 #define UART_DR   (*(volatile uint32_t *) (UART_BASE + 0x00))  // Data register
 #define UART_FR   (*(volatile uint32_t *) (UART_BASE + 0x18))  // Flag register
-#define QEMU_EXIT_PORT 0x501
-#define QEMU_SHUTDOWN_PORT 0x604
+#define QEMU_SHUTDOWN_PORT 0x84000008
 
 // Function prototypes
 void print_string(const char *str);
@@ -99,7 +98,7 @@ int strcmp(const char *str1, const char *str2) {
 void system_off(void)
     {
         print_string("[kernel]vOS Kernel Shutdown...\n");
-        register const uint64_t function_id asm( "x0" ) = 0x84000008;
+        register const uint64_t function_id asm( "x0" ) = QEMU_SHUTDOWN_PORT;//0x84000008;
         asm volatile( "hvc #0" :: "r"(function_id) );
         while( 1 ) asm( "" );
     }

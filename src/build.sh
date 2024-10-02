@@ -13,7 +13,7 @@ build() {
         echo "Building UEFI bootloader..."
 
         # Compile UEFI bootloader in C
-        aarch64-linux-gnu-gcc -c -o boot.o uefi-boot.c -ffreestanding -nostdlib
+        aarch64-linux-gnu-gcc -I/usr/include/efi -c -o boot.o uefi-boot.c -ffreestanding -nostdlib  -fno-stack-protector -fpic  -fshort-wchar -Wall
 
     else
         echo "Building standard bootloader..."
@@ -31,10 +31,13 @@ build() {
 
     # Link bootloader and kernel into a single ELF
     aarch64-linux-gnu-ld -T kernel.ld -o boot.elf boot.o kernel.o
+    run_qemu
 
+
+}
+
+run_qemu() {
     echo "Running QEMU..."
-
-    # Run the combined ELF in QEMU
     qemu-system-aarch64 -M virt -cpu cortex-a53 -nographic -semihosting -serial mon:stdio -kernel boot.elf
 }
 

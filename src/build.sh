@@ -13,29 +13,30 @@ build() {
 
     # Compile kernel in C
     aarch64-linux-gnu-gcc -c -o kernel.o kernel.c -ffreestanding -nostdlib
+
     if [ "$1" == "uefi" ]; then
         echo "Building UEFI bootloader..."
 
         # Compile UEFI bootloader in C
-        aarch64-linux-gnu-gcc -I/usr/local/include/efi -c -o boot.o uefi-boot.c -ffreestanding -nostdlib -fno-stack-protector -fpic -fshort-wchar -Wall
+        aarch64-linux-gnu-gcc -I/usr/local/include/efi -I/usr/include/efi -c -o boot.o uefi-boot.c \
+            -ffreestanding -nostdlib -fno-stack-protector -fpic -fshort-wchar -Wall
 
         echo "Linking UEFI bootloader with required libraries..."
 
         # Link UEFI bootloader with libraries
-        aarch64-linux-gnu-gcc -o boot.elf boot.o kernel.o -nostdlib -T kernel.ld -L/usr/local/lib -l:libefi.a -l:libgnuefi.a
-
+        aarch64-linux-gnu-gcc -o boot.elf boot.o kernel.o -nostdlib -T kernel-uefi.ld \
+            -L/usr/local/lib -l:libefi.a -l:libgnuefi.a
     else
-        echo "Building standard bootloader..."
+        echo "Building standard BIOS bootloader..."
 
         # Assemble standard bootloader
         aarch64-linux-gnu-as -o boot.o boot.S
+        echo "Linking bootloader and kernel..."
+
+        # Link bootloader and kernel into a single ELF
+        aarch64-linux-gnu-ld -T kernel.ld -o boot.elf boot.o kernel.o
     fi
 
-
-    echo "Linking bootloader and kernel..."
-
-    # Link bootloader and kernel into a single ELF
-    aarch64-linux-gnu-ld -T kernel.ld -o boot.elf boot.o kernel.o
     run_qemu
 }
 

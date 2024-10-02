@@ -5,7 +5,7 @@ build_dir = "../build/"
 # Function to clean the build artifacts
 clean() {
     echo "Cleaning build files..."
-    rm -f boot.o kernel.o #boot.elf
+    rm -f boot.o kernel.o
     echo "Clean complete."
 }
 
@@ -44,7 +44,7 @@ build() {
 
 run_qemu() {
     echo "Running QEMU..."
-    qemu-system-aarch64 -M virt -cpu cortex-a53 -nographic -semihosting -serial mon:stdio -kernel "$boot_dir"boot.elf
+    qemu-system-aarch64 -M virt -cpu cortex-a53 -nographic -serial mon:stdio -kernel "$boot_dir"boot.elf
 }
 
 # Check for arguments

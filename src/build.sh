@@ -9,10 +9,18 @@ clean() {
 
 # Function to build the bootloader and kernel
 build() {
-    echo "Building bootloader..."
+    if [ "$1" == "uefi" ]; then
+        echo "Building UEFI bootloader..."
 
-    # Assemble bootloader
-    aarch64-linux-gnu-as -o boot.o boot.S
+        # Compile UEFI bootloader in C
+        aarch64-linux-gnu-gcc -c -o boot.o uefi-boot.c -ffreestanding -nostdlib
+
+    else
+        echo "Building standard bootloader..."
+
+        # Assemble standard bootloader
+        aarch64-linux-gnu-as -o boot.o boot.S
+    fi
 
     echo "Building kernel..."
 
@@ -35,13 +43,14 @@ if [ "$1" == "clean" ]; then
     clean
     exit 0
 elif [ "$1" == "build" ]; then
-    build
+    build "$2"
 elif [ "$1" == "cleanbuild" ]; then
     clean
-    build
+    build "$2"
 else
     printf "build.sh usage...\n\n"
-    echo "'./build.sh build' to build vOS-Kernel"
+    echo "'./build.sh build' to build with boot.S"
+    echo "'./build.sh build uefi' to build with uefi-boot.c"
     echo "'./build.sh clean' to remove old executables"
-    echo "'./build.sh cleanbuild' to remove old executables and build vOS-Kernel"
+    echo "'./build.sh cleanbuild' to remove old executables and build"
 fi

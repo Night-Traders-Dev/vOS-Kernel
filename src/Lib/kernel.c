@@ -25,6 +25,9 @@ void kernel_entry(void) {
     // Print a message indicating the kernel is running
     print_string("[kernel] Kernel initialized.\n");
 
+    // Clear console
+    print_string("\033[2J\033[H");
+
     // Main kernel loop to capture input
     while (1) {
         print_string("$ ");

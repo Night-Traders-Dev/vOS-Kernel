@@ -17,14 +17,14 @@ print_boot_msg:
     cmp w2, #0                 /* Check if null byte */
     b.eq boot_kernel           /* If null byte, finish and jump to kernel */
 
-    /* Direct UART Output */
-    mov x3, #0x09000000        /* UART base address for QEMU virt machine */
+    /* Print bootloader message */
+    bl print_string        /* Branch Link UART address to x3*/
     strb w2, [x3]              /* Write the byte to UART */
     b print_boot_msg              /* Loop until string is printed */
 
 boot_kernel:
     /* Print a message before jumping to kernel */
-    ldr x0, =jump_to_kernel_str
+    ldr x0, =jump_to_kernel_msg
     bl print_string
 
     /* Jump to the kernel entry point */
@@ -52,7 +52,7 @@ print_done:
 boot_msg:
     .ascii "[bootloader]Boot init completed\n"    /* The string to print */
 
-jump_to_kernel_str:
+jump_to_kernel_msg:
     .ascii "[bootloader]Kernel init starting...\n"  /* Message before jumping to kernel */
 
 /* Stack */

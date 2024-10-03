@@ -7,6 +7,7 @@
 
 // Array of commands for help function
 const char *commands[] = {
+    "clear - clears console",
     "version - displays version number",
     "help - displays this menu",
     "exit - shutsdown vOS"
@@ -15,6 +16,8 @@ const char *commands[] = {
 void handle_command(const char *buffer) {
     if (strcmp(buffer, "exit") == 0) {
         syscall_exit();
+    } else if (strcmp(buffer, "clear") == 0) {
+        syscall_print_string("\033[2J\033[H");
     } else if (strcmp(buffer, "version") == 0) {
         syscall_print_string("[shell] Version: 0.0.1\n");
     } else if (strcmp(buffer, "help") == 0) {

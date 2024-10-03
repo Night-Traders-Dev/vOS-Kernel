@@ -1,3 +1,4 @@
 *.elf
 *.bak
 *.o
+dmesg

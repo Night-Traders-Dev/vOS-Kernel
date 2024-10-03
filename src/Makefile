@@ -14,7 +14,9 @@ CFLAGS = -ffreestanding -nostdlib -I$(INCLUDE_DIR)
 UEFI_FLAGS = -fno-stack-protector -fpic -fshort-wchar -Wall
 
 # Target rules
-all: build
+all: clean build run
+
+all_uefi: clean build_uefi run
 
 clean:
 	@echo "Cleaning build files..."

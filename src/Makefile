@@ -19,17 +19,17 @@ all: clean build run
 all_uefi: clean build_uefi run
 
 clean:
-	@echo "Cleaning build files..."
+	@echo "Cleaning build files...\n"
 	rm -f $(BOOT_DIR)/boot.o $(LIB_DIR)/kernel.o $(LIB_DIR)/command_handler.o $(LIB_DIR)/syscalls.o boot.elf $(BUILD_DIR)/boot.elf
-	@echo "Clean complete."
+	@echo "Clean complete.\n"
 
 build: $(LIB_DIR)/kernel.o $(LIB_DIR)/command_handler.o $(LIB_DIR)/syscalls.o $(BOOT_DIR)/boot.o
-	@echo "Linking bootloader and kernel..."
+	@echo "Linking bootloader and kernel...\n"
 	$(LD) -T kernel.ld -o $(BUILD_DIR)/boot.elf $(BOOT_DIR)/boot.o $(LIB_DIR)/kernel.o $(LIB_DIR)/command_handler.o $(LIB_DIR)/syscalls.o
-	@echo "Build complete."
+	@echo "Build complete.\n"
 
 build_uefi: $(LIB_DIR)/kernel.o $(BOOT_DIR)/uefi-boot.o
-	@echo "Linking UEFI bootloader with required libraries..."
+	@echo "Linking UEFI bootloader with required libraries...\n"
 	$(CC) -o $(BUILD_DIR)/boot.elf $(BOOT_DIR)/uefi-boot.o $(LIB_DIR)/kernel.o -nostdlib -T kernel-uefi.ld \
 		-L/usr/local/lib -l:libefi.a -l:libgnuefi.a
 
@@ -49,7 +49,7 @@ $(BOOT_DIR)/uefi-boot.o: $(BOOT_DIR)/uefi-boot.c
 	$(CC) -I/usr/local/include/efi -I/usr/include/efi -c -o $(BOOT_DIR)/uefi-boot.o $(BOOT_DIR)/uefi-boot.c $(CFLAGS) $(UEFI_FLAGS)
 
 run:
-	@echo "Running QEMU..."
+	@echo "Running QEMU...\n\n"
 	qemu-system-aarch64 -M virt -cpu cortex-a53 -nographic -serial mon:stdio -kernel $(BUILD_DIR)/boot.elf
 
 .PHONY: clean build build_uefi run

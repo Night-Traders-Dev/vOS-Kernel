@@ -20,34 +20,34 @@ int snprintf(char *buffer, size_t size, const char *format, ...) {
         p++; // Move past '%'
 
         switch (*p) {
-            case 'd': // Integer
-                {
-                    int i = va_arg(args, int);
-                    if (i < 0) {
-                        if (count < size - 1) {
-                            buffer[count++] = '-';
-                        }
-                        i = -i;
+            case 'd': { // Integer
+                int i = va_arg(args, int);
+                if (i < 0) {
+                    if (count < size - 1) {
+                        buffer[count++] = '-';
                     }
-                    char digits[10];
-                    int digit_count = 0;
-                    do {
+                    i = -i;
+                }
+                char digits[10];
+                int digit_count = 0;
+                do {
+                    if (digit_count < sizeof(digits)) {
                         digits[digit_count++] = (i % 10) + '0';
-                        i /= 10;
-                    } while (i > 0);
-                    for (int j = digit_count - 1; j >= 0 && count < size - 1; j--) {
-                        buffer[count++] = digits[j];
                     }
+                    i /= 10;
+                } while (i > 0 && digit_count < sizeof(digits));
+                for (int j = digit_count - 1; j >= 0 && count < size - 1; j--) {
+                    buffer[count++] = digits[j];
                 }
                 break;
-            case 's': // String
-                {
-                    char *s = va_arg(args, char *);
-                    while (*s && count < size - 1) {
-                        buffer[count++] = *s++;
-                    }
+            }
+            case 's': { // String
+                char *s = va_arg(args, char *);
+                while (*s && count < size - 1) {
+                    buffer[count++] = *s++;
                 }
                 break;
+            }
             case 'c': // Character
                 if (count < size - 1) {
                     buffer[count++] = (char)va_arg(args, int);
@@ -84,32 +84,32 @@ int sprintf(char *buffer, const char *format, ...) {
         p++; // Move past '%'
 
         switch (*p) {
-            case 'd': // Integer
-                {
-                    int i = va_arg(args, int);
-                    if (i < 0) {
-                        buffer[count++] = '-';
-                        i = -i;
-                    }
-                    char digits[10];
-                    int digit_count = 0;
-                    do {
+            case 'd': { // Integer
+                int i = va_arg(args, int);
+                if (i < 0) {
+                    buffer[count++] = '-';
+                    i = -i;
+                }
+                char digits[10];
+                int digit_count = 0;
+                do {
+                    if (digit_count < sizeof(digits)) {
                         digits[digit_count++] = (i % 10) + '0';
-                        i /= 10;
-                    } while (i > 0);
-                    for (int j = digit_count - 1; j >= 0; j--) {
-                        buffer[count++] = digits[j];
                     }
+                    i /= 10;
+                } while (i > 0 && digit_count < sizeof(digits));
+                for (int j = digit_count - 1; j >= 0; j--) {
+                    buffer[count++] = digits[j];
                 }
                 break;
-            case 's': // String
-                {
-                    char *s = va_arg(args, char *);
-                    while (*s) {
-                        buffer[count++] = *s++;
-                    }
+            }
+            case 's': { // String
+                char *s = va_arg(args, char *);
+                while (*s) {
+                    buffer[count++] = *s++;
                 }
                 break;
+            }
             case 'c': // Character
                 buffer[count++] = (char)va_arg(args, int);
                 break;
@@ -187,14 +187,18 @@ int fs_read(const char *filename, char *buffer, int size) {
     return -1; // File not found
 }
 
-// Function to list files in the filesystem
 void fs_ls(void) {
     syscall_print_string("[kernel] Listing files:\n");
     for (int i = 0; i < MAX_FILES; i++) {
         if (filesystem[i].name[0] != '\0') { // File exists
             char info[64]; // Buffer for file info
-            sprintf(info, "[kernel] %s - Size: %d bytes\n", filesystem[i].name, filesystem[i].size);
-            syscall_print_string(info); // Print file name and size
+            int written = snprintf(info, sizeof(info), "[kernel] %s - Size: %d bytes\n", filesystem[i].name, filesystem[i].size);
+            if (written >= sizeof(info)) {
+                syscall_print_string("[kernel] Error: Info string too long.\n");
+            } else {
+                syscall_print_string(info); // Print file name and size
+            }
         }
     }
+    syscall_print_string("[kernel] Finished listing files.\n");
 }

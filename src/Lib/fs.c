@@ -1,7 +1,6 @@
 #include "fs.h"
 #include "syscalls.h"
 #include "vstring.h"
-#include <string.h>
 
 
 static File filesystem[MAX_FILES];

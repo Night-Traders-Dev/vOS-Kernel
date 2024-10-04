@@ -1,6 +1,3 @@
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
 #include "command_handler.h"
 #include "kernel.h"
 #include "syscalls.h"

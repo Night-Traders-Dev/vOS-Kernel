@@ -13,9 +13,7 @@ void print_string(const char *str) {
     }
 }
 
-int snprintf(char *buffer, size_t size, const char *format, ...) {
-    va_list args;
-    va_start(args, format);
+static int format_string(char *buffer, size_t size, const char *format, va_list args) {
     char *p;
     int count = 0;
 
@@ -31,9 +29,7 @@ int snprintf(char *buffer, size_t size, const char *format, ...) {
             case 'd': { // Integer
                 int i = va_arg(args, int);
                 if (i < 0) {
-                    if (count < size - 1) {
-                        buffer[count++] = '-';
-                    }
+                    buffer[count++] = '-';
                     i = -i;
                 }
                 char digits[10];
@@ -73,6 +69,13 @@ int snprintf(char *buffer, size_t size, const char *format, ...) {
     }
 
     buffer[count < size ? count : size - 1] = '\0'; // Null-terminate the string
+    return count;
+}
+
+int snprintf(char *buffer, size_t size, const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    int count = format_string(buffer, size, format, args);
     va_end(args);
     return count;
 }
@@ -80,55 +83,7 @@ int snprintf(char *buffer, size_t size, const char *format, ...) {
 int sprintf(char *buffer, const char *format, ...) {
     va_list args;
     va_start(args, format);
-    char *p;
-    int count = 0;
-
-    for (p = (char *)format; *p != '\0'; p++) {
-        if (*p != '%') {
-            buffer[count++] = *p;
-            continue;
-        }
-
-        p++; // Move past '%'
-
-        switch (*p) {
-            case 'd': { // Integer
-                int i = va_arg(args, int);
-                if (i < 0) {
-                    buffer[count++] = '-';
-                    i = -i;
-                }
-                char digits[10];
-                int digit_count = 0;
-                do {
-                    if (digit_count < sizeof(digits)) {
-                        digits[digit_count++] = (i % 10) + '0';
-                    }
-                    i /= 10;
-                } while (i > 0 && digit_count < sizeof(digits));
-                for (int j = digit_count - 1; j >= 0; j--) {
-                    buffer[count++] = digits[j];
-                }
-                break;
-            }
-            case 's': { // String
-                char *s = va_arg(args, char *);
-                while (*s) {
-                    buffer[count++] = *s++;
-                }
-                break;
-            }
-            case 'c': // Character
-                buffer[count++] = (char)va_arg(args, int);
-                break;
-            default: // Unsupported format
-                buffer[count++] = '%';
-                buffer[count++] = *p;
-                break;
-        }
-    }
-
-    buffer[count] = '\0'; // Null-terminate the string
+    int count = format_string(buffer, SIZE_MAX, format, args); // SIZE_MAX for no limit
     va_end(args);
     return count;
 }

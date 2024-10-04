@@ -16,5 +16,6 @@ void fs_init(void);
 int fs_create(const char *filename);
 int fs_write(const char *filename, const char *data, int size);
 int fs_read(const char *filename, char *buffer, int size);
+void fs_ls(void);  // Add this line
 
 #endif // FS_H

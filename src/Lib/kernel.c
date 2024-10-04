@@ -3,6 +3,7 @@
 #include <string.h>
 #include "command_handler.h"
 #include "kernel.h"
+#include "syscalls.h"
 
 // Kernel entry point
 void kernel_entry(void) {
@@ -13,6 +14,10 @@ void kernel_entry(void) {
 
     // Clear console
     print_string("\033[2J\033[H");
+
+    // Create test file
+    syscall_fs_create("kernel.fs");
+    syscall_fs_write("kernel.fs", "128 byte debug test.", 128);
 
     // Main kernel loop to capture input
     while (1) {

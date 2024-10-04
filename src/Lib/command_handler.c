@@ -20,6 +20,8 @@ void handle_command(const char *buffer) {
         syscall_print_string("\033[2J\033[H");
     } else if (strcmp(buffer, "version") == 0) {
         syscall_print_string("[shell] Version: 0.0.1\n");
+    } else if (strcmp(buffer, "ls") == 0) {
+        syscall_fs_ls();
     } else if (strcmp(buffer, "help") == 0) {
         syscall_print_string("[shell] Commands:\n");
         for (int i = 0; i < sizeof(commands) / sizeof(commands[0]); i++) {

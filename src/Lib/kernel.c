@@ -13,7 +13,7 @@ void kernel_entry(void) {
     print_string("[kernel] Kernel initialized.\n");
 
     // Clear console
-    print_string("\033[2J\033[H");
+//    print_string("\033[2J\033[H");
 
     // Create test file
     syscall_fs_create("kernel.fs");

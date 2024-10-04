@@ -51,15 +51,25 @@ int fs_read(const char *filename, char *buffer, int size) {
 void fs_ls(void) {
     syscall_print_string("[kernel] Listing files:\n");
     for (int i = 0; i < MAX_FILES; i++) {
-        if (filesystem[i].name[0] != '\0') { // File exists
-            char info[64]; // Buffer for file info
+        if (filesystem[i].name[0] != '\0') { // Check if file exists
+            char info[128]; // Buffer for file info
             int written = snprintf(info, sizeof(info), "[kernel] %s - Size: %d bytes\n", filesystem[i].name, filesystem[i].size);
-            if (written >= sizeof(info)) {
-                syscall_print_string("[kernel] Error: Info string too long.\n");
+            if (written < 0 || written >= sizeof(info)) {
+                syscall_print_string("[kernel] Error: Info string too long or failed to write.\n");
             } else {
                 syscall_print_string(info); // Print file name and size
             }
         }
     }
     syscall_print_string("[kernel] Finished listing files.\n");
+}
+
+
+int fs_cat(const char *filename) {
+    char buffer[128];
+    fs_read(filename, buffer, sizeof(buffer));
+    syscall_print_string(filename);
+    syscall_print_string("\n");
+    syscall_print_string(buffer);
+    syscall_print_string("\n");
 }

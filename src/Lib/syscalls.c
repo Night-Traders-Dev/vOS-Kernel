@@ -20,7 +20,7 @@ void syscall_handler(uint64_t syscall_number, uint64_t arg1, uint64_t arg2, uint
         case SYSCALL_FS_READ:
             syscall_fs_read((const char *)arg1, (char *)arg2, (int)arg3);
             break;
-        case SYSCALL_FS_LS:  // Handle the new ls syscall
+        case SYSCALL_FS_LS:
             syscall_fs_ls();
             break;
         default:
@@ -70,3 +70,4 @@ int syscall_fs_read(const char *filename, char *buffer, int size) {
 void syscall_fs_ls(void) {
     fs_ls();
 }
+

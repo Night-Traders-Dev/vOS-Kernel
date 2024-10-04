@@ -23,5 +23,4 @@ void syscall_fs_create(const char *filename);
 int syscall_fs_write(const char *filename, const char *data, int size);
 int syscall_fs_read(const char *filename, char *buffer, int size);
 void syscall_fs_ls(void);
-
 #endif // SYSCALLS_H

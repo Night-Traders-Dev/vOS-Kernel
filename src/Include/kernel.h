@@ -13,11 +13,9 @@
 #define QEMU_SHUTDOWN_PORT 0x84000008
 
 // Function prototypes
-void print_string(const char *str);
 void kernel_entry(void);
 char uart_read_char(void);
 void uart_read_string(char *buffer, int max_length);
-int strcmp(const char *str1, const char *str2);
 void system_off(void);
 void handle_command(const char *command);
 

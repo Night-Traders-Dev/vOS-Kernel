@@ -4,6 +4,7 @@
 #include "command_handler.h"
 #include "kernel.h"
 #include "syscalls.h"
+#include "vstring.h"
 
 // Kernel entry point
 void kernel_entry(void) {
@@ -29,13 +30,6 @@ void kernel_entry(void) {
     }
 }
 
-// Function to print a string to UART
-void print_string(const char *str) {
-    while (*str) {
-        while (UART_FR & (1 << 5)) {} // Wait if UART is busy
-        UART_DR = *str++;  // Output each character to UART
-    }
-}
 
 // Function to read a single character from UART
 char uart_read_char(void) {
@@ -74,14 +68,6 @@ void uart_read_string(char *buffer, int max_length) {
     buffer[i] = '\0';  // Null-terminate the string just in case
 }
 
-// Custom strcmp implementation
-int strcmp(const char *str1, const char *str2) {
-    while (*str1 && (*str1 == *str2)) {
-        str1++;
-        str2++;
-    }
-    return *(unsigned char *)str1 - *(unsigned char *)str2;
-}
 
 // Function to shut down QEMU (via hypervisor call)
 void system_off(void) {

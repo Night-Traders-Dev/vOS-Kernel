@@ -3,7 +3,15 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include "vstring.h"
+#include "kernel.h"
 
+// Function to print a string to UART
+void print_string(const char *str) {
+    while (*str) {
+        while (UART_FR & (1 << 5)) {} // Wait if UART is busy
+        UART_DR = *str++;  // Output each character to UART
+    }
+}
 
 int snprintf(char *buffer, size_t size, const char *format, ...) {
     va_list args;
@@ -140,4 +148,13 @@ void *memcpy(void *dest, const void *src, size_t n) {
         *d++ = *s++;
     }
     return dest;
+}
+
+// Custom strcmp implementation
+int strcmp(const char *str1, const char *str2) {
+    while (*str1 && (*str1 == *str2)) {
+        str1++;
+        str2++;
+    }
+    return *(unsigned char *)str1 - *(unsigned char *)str2;
 }

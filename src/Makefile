@@ -78,4 +78,16 @@ run:
 	@date "+[%Y-%m-%d %H:%M:%S] Running QEMU..." >> dmesg
 	qemu-system-aarch64 -M virt -cpu cortex-a53 -nographic -serial mon:stdio -kernel $(BUILD_DIR)/boot.elf
 
+debug:
+	@echo "Running QEMU in debug mode\nConnect gdb...\n" | tee -a dmesg
+	@date "+[%Y-%m-%d %H:%M:%S] Running QEMU in debug mode..." >> dmesg
+	qemu-system-aarch64 -s -S -M virt -cpu cortex-a53 -nographic -serial mon:stdio -kernel $(BUILD_DIR)/boot.elf
+
+###Running in debug requires gdb-multiarch
+###clean, build, and run debug
+###In a second terminal cd to the kernel repo
+###cd into build and run gdb-mutiarch boot.elf
+###in gdb type `target remote localhost:1234`
+
+
 .PHONY: clean build build_uefi run

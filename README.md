@@ -1,5 +1,3 @@
-Here’s your updated README with the necessary sections in bold:
-
 vOS Kernel
 
 Welcome to the vOS Kernel! This project is a simple ARM64 microkernel designed for educational purposes and experimentation with operating system concepts. The kernel is capable of booting in a QEMU environment and handling basic input and output through UART.

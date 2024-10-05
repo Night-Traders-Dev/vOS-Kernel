@@ -2,12 +2,13 @@
 #define VSTRING_H
 
 #include <stddef.h>
+#include <stdarg.h>
 #include "kernel.h"
 
 // Function prototypes
-int vprint(char *buffer, size_t size, const char *format, ...);
 void printf_string(const char *format, ...);
 void print_string(const char *str);
+int vprint(char *buffer, size_t size, const char *format, va_list args);
 
 // Minimal implementations of string functions
 char *strcpy(char *dest, const char *src);

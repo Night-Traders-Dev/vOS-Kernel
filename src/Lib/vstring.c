@@ -5,11 +5,20 @@
 #include "vstring.h"
 #include "kernel.h"
 
+
+// Function to print a string to UART
+void print_string(const char *str) {
+    while (*str) {
+        while (UART_FR & (1 << 5)) {} // Wait if UART is busy
+        UART_DR = *str++;  // Output each character to UART
+    }
+}
+
 void printf_string(const char *format, ...) {
     char buffer[128];  // Buffer for formatted string
     va_list args;
     va_start(args, format);
-    vprint(buffer, sizeof(buffer), format, args);  // Use vprint to format the string
+    vprint(buffer, sizeof(buffer), format, args);  // Pass va_list directly
     va_end(args);
 
     // Output formatted string via UART
@@ -20,59 +29,7 @@ void printf_string(const char *format, ...) {
     }
 }
 
-// Function to print a string to UART
-void print_string(const char *str) {
-    while (*str) {
-        while (UART_FR & (1 << 5)) {} // Wait if UART is busy
-        UART_DR = *str++;  // Output each character to UART
-    }
-}
-
-int strlength(const char *str) {
-    int length = 0;
-    while (*str++) {
-        length++;
-    }
-    return length;
-}
-
-char* int_to_string(int num, char *buffer) {
-    int i = 0;
-    int is_negative = 0;
-
-    // Handle negative numbers
-    if (num < 0) {
-        is_negative = 1;
-        num = -num;
-    }
-
-    // Generate digits in reverse order
-    do {
-        buffer[i++] = (num % 10) + '0';
-        num /= 10;
-    } while (num > 0);
-
-    // Add minus sign for negative numbers
-    if (is_negative) {
-        buffer[i++] = '-';
-    }
-
-    // Null-terminate the string
-    buffer[i] = '\0';
-
-    // Reverse the string
-    for (int j = 0; j < i / 2; j++) {
-        char temp = buffer[j];
-        buffer[j] = buffer[i - j - 1];
-        buffer[i - j - 1] = temp;
-    }
-
-    return buffer;
-}
-
-int vprint(char *buffer, size_t size, const char *format, ...) {
-    va_list args;
-    va_start(args, format);
+int vprint(char *buffer, size_t size, const char *format, va_list args) {
     char *p;
     int count = 0;
 
@@ -130,9 +87,52 @@ int vprint(char *buffer, size_t size, const char *format, ...) {
     }
 
     buffer[count] = '\0'; // Null-terminate the string
-    va_end(args);
     return count;
 }
+
+
+int strlength(const char *str) {
+    int length = 0;
+    while (*str++) {
+        length++;
+    }
+    return length;
+}
+
+char* int_to_string(int num, char *buffer) {
+    int i = 0;
+    int is_negative = 0;
+
+    // Handle negative numbers
+    if (num < 0) {
+        is_negative = 1;
+        num = -num;
+    }
+
+    // Generate digits in reverse order
+    do {
+        buffer[i++] = (num % 10) + '0';
+        num /= 10;
+    } while (num > 0);
+
+    // Add minus sign for negative numbers
+    if (is_negative) {
+        buffer[i++] = '-';
+    }
+
+    // Null-terminate the string
+    buffer[i] = '\0';
+
+    // Reverse the string
+    for (int j = 0; j < i / 2; j++) {
+        char temp = buffer[j];
+        buffer[j] = buffer[i - j - 1];
+        buffer[i - j - 1] = temp;
+    }
+
+    return buffer;
+}
+
 
 // Minimal implementation of strcpy
 char *strcpy(char *dest, const char *src) {

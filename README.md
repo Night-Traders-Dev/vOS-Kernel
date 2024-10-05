@@ -20,7 +20,6 @@ Welcome to the vOS Kernel! This project is a simple ARM64 microkernel designed f
 
 
 # Features
-> [!IMPORTANT]
 UART Output: Sends boot messages and kernel status to the serial console.
 
 Basic Command Shell: A simple shell that accepts commands, currently supports an exit command.
@@ -75,7 +74,10 @@ make run
 * Bootloader: Written in assembly, initializes the stack and prints a boot message to UART.
 
 * Kernel: Written in C, it initializes the UART, sets up the interrupt vector table, and enters a simple command shell.
-
+> [!IMPORTANT]
+> Bootloader and Kernel wrote specifically with Arm64(aarch64) in mind.
+> Risc-V support planned
+> x86_64 support not planned
 
 # Key Components
 

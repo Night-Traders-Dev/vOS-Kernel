@@ -75,9 +75,9 @@ make run
 
 * Kernel: Written in C, it initializes the UART, sets up the interrupt vector table, and enters a simple command shell.
 > [!IMPORTANT]
-> Bootloader and Kernel wrote specifically with Arm64(aarch64) in mind.
-> Risc-V support planned
-> x86_64 support not planned
+> * Bootloader and Kernel wrote specifically with Arm64(aarch64) in mind.
+> * Risc-V support planned
+> * x86_64 support not planned
 
 # Key Components
 

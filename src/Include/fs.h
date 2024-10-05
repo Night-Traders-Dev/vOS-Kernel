@@ -14,6 +14,7 @@ typedef struct {
 } File;
 
 void fs_init(void);
+int fs_dir_size(const char *dirname, int new_size);
 int fs_mkdir(const char *dirname);
 int fs_create(const char *filename);
 int fs_write(const char *filename, const char *data, int size);

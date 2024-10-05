@@ -32,6 +32,16 @@ int fs_mkdir(const char *dirname) {
     return -1; // No space left
 }
 
+int fs_dir_size(const char *dirname, int new_size) {
+    for (int i = 0; i < MAX_FILES; i++) {
+        if (strcmp(filesystem[i].name, dirname) == 0 && filesystem[i].type == 0) { // Ensure it's a directory
+            filesystem[i].size = new_size;
+            return 0; // Success
+        }
+    }
+    return -1; // Directory not found
+}
+
 int fs_create(const char *filename) {
     for (int i = 0; i < MAX_FILES; i++) {
         if (filesystem[i].name[0] == '\0') {

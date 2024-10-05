@@ -22,6 +22,7 @@ void kernel_entry(void) {
     fs_write("kernel.fs", "Kernel Dummy File", 17);
     fs_create("data.fs");
     fs_write("data.fs", "Data Dummy File", 15);
+    fs_dir_size("/", 32);
 
 
 

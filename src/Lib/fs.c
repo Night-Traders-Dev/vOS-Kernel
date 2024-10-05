@@ -2,6 +2,11 @@
 #include "syscalls.h"
 #include "vstring.h"
 
+// fs opcodes
+// 0 = directory
+// 1 = file
+//
+//
 
 static File filesystem[MAX_FILES];
 
@@ -52,16 +57,13 @@ void fs_ls(void) {
     syscall_print_string("[kernel] Listing files:\n");
     for (int i = 0; i < MAX_FILES; i++) {
         if (filesystem[i].name[0] != '\0') { // Check if file exists
-            char info[128]; // Buffer for file info
-            int written = snprintf(info, sizeof(info), "[kernel] %s - Size: %d bytes\n", filesystem[i].name, filesystem[i].size);
-            if (written < 0 || written >= sizeof(info)) {
-                syscall_print_string("[kernel] Error: Info string too long or failed to write.\n");
-            } else {
-                syscall_print_string(info); // Print file name and size
-            }
+            syscall_print_string(filesystem[i].name);
+            syscall_print_string(" - ");
+            char buffer[128];
+            syscall_print_string(int_to_string(filesystem[i].size, buffer));
+            syscall_print_string("\n");
         }
     }
-    syscall_print_string("[kernel] Finished listing files.\n");
 }
 
 

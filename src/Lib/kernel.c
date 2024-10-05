@@ -16,9 +16,9 @@ void kernel_entry(void) {
 
     // Create test file
     fs_init();
-    if (fs_create("kernel.fs") == 0) {
-        fs_write("kernel.fs", "Kernel Dummy File", 17);
-    }
+    fs_create("kernel.fs");
+    fs_write("kernel.fs", "Kernel Dummy File", 17);
+
 
     // Main kernel loop to capture input
     while (1) {

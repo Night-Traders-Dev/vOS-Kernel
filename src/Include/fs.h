@@ -10,7 +10,7 @@ typedef struct {
     char data[MAX_FILE_SIZE];
     int size;
     int is_open;
-    int op;
+    int type;
 } File;
 
 void fs_init(void);

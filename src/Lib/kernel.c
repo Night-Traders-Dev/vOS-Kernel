@@ -17,6 +17,7 @@ void kernel_entry(void) {
 
     // Create test file
     fs_init();
+    fs_mkdir("/");
     fs_create("kernel.fs");
     fs_write("kernel.fs", "Kernel Dummy File", 17);
     fs_create("data.fs");

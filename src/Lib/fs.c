@@ -18,12 +18,27 @@ void fs_init(void) {
     }
 }
 
+
+int fs_mkdir(const char *dirname) {
+    for (int i = 0; i < MAX_FILES; i++) {
+        if (filesystem[i].name[0] == '\0') {
+            strcpy(filesystem[i].name, dirname);
+            filesystem[i].size = 0;
+            filesystem[i].is_open = 1;
+            filesystem[i].type = 0; // 0 for directory
+            return 0;
+        }
+    }
+    return -1; // No space left
+}
+
 int fs_create(const char *filename) {
     for (int i = 0; i < MAX_FILES; i++) {
         if (filesystem[i].name[0] == '\0') {
             strcpy(filesystem[i].name, filename);
             filesystem[i].size = 0;
             filesystem[i].is_open = 1;
+            filesystem[i].type = 1; // 1 for file
             return 0;
         }
     }
@@ -53,19 +68,21 @@ int fs_read(const char *filename, char *buffer, int size) {
     return -1; // File not found
 }
 
+
+
 void fs_ls(void) {
-    syscall_print_string("[shell] Listing files:\n");
+    syscall_print_string("[shell] Listing files and directories:\n");
     for (int i = 0; i < MAX_FILES; i++) {
-        if (filesystem[i].name[0] != '\0') { // Check if file exists
+        if (filesystem[i].name[0] != '\0') {
             syscall_print_string(filesystem[i].name);
             syscall_print_string(" - ");
             char buffer[128];
             syscall_print_string(int_to_string(filesystem[i].size, buffer));
-            syscall_print_string(" bytes \n");
+            syscall_print_string(" bytes");
+            syscall_print_string(filesystem[i].type == 0 ? " [DIR]\n" : " [FILE]\n");
         }
     }
 }
-
 
 int fs_cat(const char *filename) {
     char buffer[128];

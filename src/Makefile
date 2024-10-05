@@ -7,7 +7,8 @@ LIB_DIR = Lib
 INCLUDE_DIR = Include
 
 # Compiler and linker flags
-CC = aarch64-linux-gnu-gcc
+CC = clang
+##CC = aarch64-linux-gnu-gcc-13
 AS = aarch64-linux-gnu-as
 LD = aarch64-linux-gnu-ld
 CFLAGS = -ffreestanding -nostdlib -I$(INCLUDE_DIR)

@@ -5,6 +5,21 @@
 #include "vstring.h"
 #include "kernel.h"
 
+void printf_string(const char *format, ...) {
+    char buffer[128];  // Buffer for formatted string
+    va_list args;
+    va_start(args, format);
+    vprint(buffer, sizeof(buffer), format, args);  // Use vprint to format the string
+    va_end(args);
+
+    // Output formatted string via UART
+    char *str = buffer;
+    while (*str) {
+        while (UART_FR & (1 << 5)) {} // Wait if UART is busy
+        UART_DR = *str++;  // Output each character to UART
+    }
+}
+
 // Function to print a string to UART
 void print_string(const char *str) {
     while (*str) {
@@ -55,8 +70,9 @@ char* int_to_string(int num, char *buffer) {
     return buffer;
 }
 
-
-static int format_string(char *buffer, size_t size, const char *format, va_list args) {
+int vprint(char *buffer, size_t size, const char *format, ...) {
+    va_list args;
+    va_start(args, format);
     char *p;
     int count = 0;
 
@@ -72,7 +88,9 @@ static int format_string(char *buffer, size_t size, const char *format, va_list 
             case 'd': { // Integer
                 int i = va_arg(args, int);
                 if (i < 0) {
-                    buffer[count++] = '-';
+                    if (count < size - 1) {
+                        buffer[count++] = '-';
+                    }
                     i = -i;
                 }
                 char digits[10];
@@ -111,22 +129,7 @@ static int format_string(char *buffer, size_t size, const char *format, va_list 
         }
     }
 
-    buffer[count < size ? count : size - 1] = '\0'; // Null-terminate the string
-    return count;
-}
-
-int snprintf(char *buffer, size_t size, const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    int count = format_string(buffer, size, format, args);
-    va_end(args);
-    return count;
-}
-
-int sprintf(char *buffer, const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    int count = format_string(buffer, SIZE_MAX, format, args); // SIZE_MAX for no limit
+    buffer[count] = '\0'; // Null-terminate the string
     va_end(args);
     return count;
 }

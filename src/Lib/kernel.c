@@ -19,10 +19,12 @@ void kernel_entry(void) {
     fs_init();
     fs_mkdir("/");
     fs_create("kernel.fs");
-    fs_write("kernel.fs", "Kernel Dummy File", 17);
+    char *kernel_fs = "Kernel Dummy File";
+    char *data_fs = "Data Dummy File";
+    fs_write("kernel.fs", kernel_fs, strlength(kernel_fs));
     fs_create("data.fs");
-    fs_write("data.fs", "Data Dummy File", 15);
-    fs_dir_size("/", 32);
+    fs_write("data.fs", data_fs, strlength(data_fs));
+    fs_dir_size("/", (strlength(kernel_fs) + strlength(data_fs)));
 
 
 

@@ -13,6 +13,14 @@ void print_string(const char *str) {
     }
 }
 
+int strlength(const char *str) {
+    int length = 0;
+    while (*str++) {
+        length++;
+    }
+    return length;
+}
+
 char* int_to_string(int num, char *buffer) {
     int i = 0;
     int is_negative = 0;

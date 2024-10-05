@@ -20,7 +20,7 @@ Welcome to the vOS Kernel! This project is a simple ARM64 microkernel designed f
 
 
 # Features
-
+[!IMPORTANT]
 UART Output: Sends boot messages and kernel status to the serial console.
 
 Basic Command Shell: A simple shell that accepts commands, currently supports an exit command.
@@ -55,6 +55,8 @@ make build
 This will assemble, compile, and link the bootloader and kernel, producing the necessary ELF file for QEMU.
 
 To build with the UEFI bootloader, use:
+[!CAUTION]
+currently uefi is not supported, using build works as default and compatibility
 ```
 make build_uefi
 ```

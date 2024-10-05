@@ -54,14 +54,14 @@ int fs_read(const char *filename, char *buffer, int size) {
 }
 
 void fs_ls(void) {
-    syscall_print_string("[kernel] Listing files:\n");
+    syscall_print_string("[shell] Listing files:\n");
     for (int i = 0; i < MAX_FILES; i++) {
         if (filesystem[i].name[0] != '\0') { // Check if file exists
             syscall_print_string(filesystem[i].name);
             syscall_print_string(" - ");
             char buffer[128];
             syscall_print_string(int_to_string(filesystem[i].size, buffer));
-            syscall_print_string("\n");
+            syscall_print_string(" bytes \n");
         }
     }
 }
@@ -71,7 +71,7 @@ int fs_cat(const char *filename) {
     char buffer[128];
     fs_read(filename, buffer, sizeof(buffer));
     syscall_print_string(filename);
-    syscall_print_string("\n");
+    syscall_print_string(":\n");
     syscall_print_string(buffer);
     syscall_print_string("\n");
 }

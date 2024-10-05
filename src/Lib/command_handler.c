@@ -8,6 +8,7 @@
 // Array of commands for help function
 const char *commands[] = {
     "clear - clears console",
+    "ls - shows current directory",
     "version - displays version number",
     "help - displays this menu",
     "exit - shutsdown vOS"
@@ -29,6 +30,6 @@ void handle_command(const char *buffer) {
             syscall_print_string("\n");
         }
     } else {
-        syscall_print_string("[kernel] Unrecognized command...\nTry typing help\n");
+        syscall_print_string("Unrecognized command...\nTry typing help\n");
     }
 }

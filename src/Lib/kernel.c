@@ -12,12 +12,16 @@ void kernel_entry(void) {
     print_string("[kernel] Kernel initialized.\n");
 
     // Clear console
-//    print_string("\033[2J\033[H");
+    print_string("\033[2J\033[H");
+    print_string("Welcome to vOS\n\n");
 
     // Create test file
     fs_init();
     fs_create("kernel.fs");
     fs_write("kernel.fs", "Kernel Dummy File", 17);
+    fs_create("data.fs");
+    fs_write("data.fs", "Data Dummy File", 15);
+
 
 
     // Main kernel loop to capture input

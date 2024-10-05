@@ -4,19 +4,19 @@ Welcome to the vOS Kernel! This project is a simple ARM64 microkernel designed f
 
 # Table of Contents
 
-Features
+* Features
 
-Getting Started
+* Getting Started
 
-Building the Project
+* Building the Project
 
-Running the Kernel
+* Running the Kernel
 
-Kernel Architecture
+* Kernel Architecture
 
-Contributing
+* Contributing
 
-License
+* License
 
 
 # Features
@@ -36,9 +36,9 @@ Formatted Output: Custom implementation of vprint for formatted string output vi
 
 To get started with vOS Kernel, you will need the following tools installed:
 
-QEMU: For running the virtual machine.
+* QEMU: For running the virtual machine.
 
-Clang: The C language family frontend for LLVM.
+* Clang: The C language family frontend for LLVM.
 
 
 You can install these on Ubuntu/Debian with the following command:
@@ -70,18 +70,18 @@ make run
 ```
 # Kernel Architecture
 
-Bootloader: Written in assembly, initializes the stack and prints a boot message to UART.
+* Bootloader: Written in assembly, initializes the stack and prints a boot message to UART.
 
-Kernel: Written in C, it initializes the UART, sets up the interrupt vector table, and enters a simple command shell.
+* Kernel: Written in C, it initializes the UART, sets up the interrupt vector table, and enters a simple command shell.
 
 
 # Key Components
 
-Boot/boot.S: Bootloader assembly code that sets up the stack and prints boot messages.
+* Boot/boot.S: Bootloader assembly code that sets up the stack and prints boot messages.
 
-Lib/kernel.c: Main kernel code that handles UART output and commands.
+* Lib/kernel.c: Main kernel code that handles UART output and commands.
 
-Include/*.h: Header files for the kernel functions.
+* Include/*.h: Header files for the kernel functions.
 
 
 # Contributing

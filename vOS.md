@@ -17,7 +17,7 @@ Welcome to the **vOS Project Suite**! This suite includes a microkernel, a deskt
 
 ## Overview
 
-The vOS Project Suite consists of three main components:
+The **vOS Project Suite** consists of three main components:
 
 1. **vOS Kernel**: A simple ARM64 microkernel that provides essential operating system features.
 2. **vOS**: A minimal user space environment that interfaces with the kernel.
@@ -30,64 +30,50 @@ The vOS Project Suite consists of three main components:
 - **Repository**: [vOS-Kernel](https://github.com/Night-Traders-Dev/vOS-Kernel)
 - **Description**: The microkernel of the vOS Project Suite. It handles basic I/O through UART and manages interrupts.
 - **Features**:
-  - UART output for boot messages and kernel status.
-  - Basic command shell.
-  - Interrupt handling.
+  - **UART output** for boot messages and kernel status.
+  - **Basic command shell**.
+  - **Interrupt handling**.
 
 ### vOS
 
 - **Repository**: [vOS](https://github.com/Night-Traders-Dev/vOS)
 - **Description**: The user space environment that communicates with the vOS kernel.
 - **Features**:
-  - User commands to interact with the kernel.
-  - Integration with the vOS Kernel for executing system calls.
+  - **User commands** to interact with the kernel.
+  - **Integration** with the vOS Kernel for executing system calls.
 
 ### vOS Desktop
 
 - **Repository**: [vOS-Desktop](https://github.com/Night-Traders-Dev/vOS-Desktop)
 - **Description**: A graphical desktop environment designed for vOS.
 - **Features**:
-  - Lightweight and minimalistic user interface.
-  - Desktop management and application launching.
+  - **Lightweight** and minimalistic user interface.
+  - **Desktop management** and application launching.
 
 ## Getting Started
 
-To get started with the vOS Project Suite, you will need to install the following tools:
+To get started with the **vOS Project Suite**, you will need to install the following tools:
 
 - **QEMU**: For running the virtual machine.
-- **GNU Toolchain for ARM64**: Specifically, `aarch64-linux-gnu-gcc` and `aarch64-linux-gnu-ld`.
-- **Python3**: For running virtual operating system.
-- **PIP**: For installing required libraries
-- **Textual**: For running the vOS-Desktop Environment
+- **Clang**: The C language family frontend for LLVM.
+- **Python3**: For running the virtual operating system.
+- **PIP**: For installing required libraries.
+- **Textual**: For running the **vOS-Desktop Environment**.
 
-Building the Projects
+## Building the Projects
 
-To build each component of the vOS Project Suite, navigate to each project repository and follow the respective build commands
+To build each component of the **vOS Project Suite**, navigate to each project repository and follow the respective build commands.
 
+## Contributing
 
-Contributing
+Contributions are welcome! If you'd like to contribute to the **vOS Project Suite**, please follow these steps:
 
-Contributions are welcome! If you'd like to contribute to the vOS Project Suite, please follow these steps:
+1. **Fork the repository.**
+2. **Create your feature branch** (`git checkout -b feature/YourFeature`).
+3. **Commit your changes** (`git commit -m 'Add some feature'`).
+4. **Push to the branch** (`git push origin feature/YourFeature`).
+5. **Open a Pull Request.**
 
-1. Fork the repository.
+## License
 
-
-2. Create your feature branch (git checkout -b feature/YourFeature).
-
-
-3. Commit your changes (git commit -m 'Add some feature').
-
-
-4. Push to the branch (git push origin feature/YourFeature).
-
-
-5. Open a Pull Request.
-
-
-
-License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
-
-
-
+This project is licensed under the **MIT License**. See the LICENSE file for details.

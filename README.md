@@ -55,7 +55,8 @@ This will assemble, compile, and link the bootloader and kernel, producing the n
 
 To build with the UEFI bootloader, use:
 > [!CAUTION]
-> currently uefi is not supported, using build works as default and compatibility
+> * currently uefi is not supported
+> * using build works as default and compatibility
 ```
 make build_uefi
 ```
@@ -112,3 +113,6 @@ Contributions are welcome! If you'd like to contribute to vOS Kernel, please fol
 
 This project is licensed under the MIT License. See the LICENSE file for details.
 
+
+> [!WARNING]
+> There be dragons<br>This code is still early and WIP

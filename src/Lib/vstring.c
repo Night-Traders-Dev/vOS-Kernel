@@ -87,6 +87,7 @@ int vprint(char *buffer, size_t size, const char *format, va_list args) {
     }
 
     buffer[count] = '\0'; // Null-terminate the string
+//    va_end[args];
     return count;
 }
 

@@ -94,11 +94,11 @@ void fs_ls(void) {
     }
 }
 
-int fs_cat(const char *filename) {
-    char buffer[128];
-    fs_read(filename, buffer, sizeof(buffer));
-    syscall_print_string(filename);
-    syscall_print_string(":\n");
-    syscall_print_string(buffer);
-    syscall_print_string("\n");
-}
+//int fs_cat(const char *filename) {
+//    char buffer[128];
+//    fs_read(filename, buffer, sizeof(buffer));
+//    syscall_print_string(filename);
+//    syscall_print_string(":\n");
+//    syscall_print_string(buffer);
+//    syscall_print_string("\n");
+//}

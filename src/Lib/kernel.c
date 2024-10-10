@@ -66,7 +66,8 @@ void uart_read_string(char *buffer, int max_length) {
 
         if (c == '\b' && i > 0) {      // Handle backspace
             i--;
-            print_string("\b \b");     // Remove the last character from the buffer
+//            print_string("\b \b");     // Remove the last character from the buffer
+            print_string("\033[D \033[D");
         } else if (c >= 32 && c < 127) { // Only allow printable characters
             buffer[i++] = c;           // Store the character in the buffer
             UART_DR = c;               // Echo the character back to UART

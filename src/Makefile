@@ -7,11 +7,18 @@ LIB_DIR = Lib
 INCLUDE_DIR = Include
 
 # Compiler and linker flags
-CC = clang
+# comment out AS and LD and uncomment other if build errors
+CC = clang-16
 ##CC = aarch64-linux-gnu-gcc-13
+
 AS = aarch64-linux-gnu-as
+##AS = llvm-as
+##AS = as
+
 LD = aarch64-linux-gnu-ld
-CFLAGS = -ffreestanding -nostdlib -I$(INCLUDE_DIR)
+##LD = llvm-link
+##LD = ld
+CFLAGS = -ffreestanding -nostdlib -fpic -fno-stack-protector -I$(INCLUDE_DIR)
 UEFI_FLAGS = -fno-stack-protector -fpic -fshort-wchar -Wall
 
 # Target rules

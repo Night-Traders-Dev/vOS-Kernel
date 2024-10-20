@@ -8,7 +8,7 @@ INCLUDE_DIR = Include
 
 # Compiler and linker flags
 # comment out AS and LD and uncomment other if build errors
-CC = clang-16
+CC = clang
 ##CC = aarch64-linux-gnu-gcc-13
 
 AS = aarch64-linux-gnu-as

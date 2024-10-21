@@ -31,8 +31,26 @@ SECTIONS
         __bss_end = .;
     } > RAM
 
-    _stack_top = ORIGIN(RAM) + LENGTH(RAM); /* Stack pointer */
+    /* Define stack region for each core (optional for hybrid mode) */
+    .arm_stack (NOLOAD) :
+    {
+        _arm_stack_start = .;
+        . = . + 32K;  /* Allocate 32KB for ARM stack */
+        _arm_stack_end = .;
+    } > RAM
+
+    .riscv_stack (NOLOAD) :
+    {
+        _riscv_stack_start = .;
+        . = . + 32K;  /* Allocate 32KB for RISC-V stack */
+        _riscv_stack_end = .;
+    } > RAM
+
+    _stack_top = ORIGIN(RAM) + LENGTH(RAM); /* Main Stack Pointer for ARM */
 
     /* Entry point */
     _start = ORIGIN(FLASH);
 }
+
+/* Assign entry point */
+ENTRY(_start)

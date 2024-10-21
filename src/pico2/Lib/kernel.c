@@ -20,8 +20,7 @@ void uart_puts(const char* str) {
 
 void kernel_main(void) {
     volatile uint32_t* mode = (uint32_t*)MODE_ADDRESS;
-    
-    // Check the mode
+
     switch (*mode) {
         case 0x01:
             uart_puts("Hello World running in ARM mode\n");
@@ -38,6 +37,6 @@ void kernel_main(void) {
     }
 
     while (1) {
-        // Halt or enter low-power state
+        // Infinite loop to halt the kernel
     }
 }

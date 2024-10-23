@@ -1,20 +1,22 @@
 cmake_minimum_required(VERSION 3.13)
 
 # Project information
-project(Multimode_Bootloader C CXX ASM)
+project(vOS-Kernel-Pico2 C CXX ASM)
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_FLAGS "-O2 -Wall")
+
+set(PICO_BOARD pico2)
+set(PICO_PLATFORM rp2350)
 
 set(PICO_SDK_PATH "/opt/pico-sdk/")
 
 include(${PICO_SDK_PATH}/pico_sdk_init.cmake)
-set(PICO_BOARD "pico2")
-#set(CMAKE_CXX_STANDARD 11)
-#set(CMAKE_C_STANDARD 11)
-# Set default compilation flags
-set(CMAKE_C_FLAGS "-O2 -Wall")
+include(${PICO_SDK_PATH}/external/pico_sdk_import.cmake)
 
 # Initialize the Pico SDK
 pico_sdk_init()
-
 
 # Set directories (Relative to the root project directory, not the build directory)
 set(BOOT_DIR "${CMAKE_SOURCE_DIR}/Boot")
@@ -24,14 +26,14 @@ set(LIB_DIR "${CMAKE_SOURCE_DIR}/Lib")
 set(BOOT_FILES "${BOOT_DIR}/stage1.c")
 set(KERNEL_FILES "${LIB_DIR}/kernel.c")
 
+# Ensure MODE is defined
+if (NOT DEFINED MODE)
+    set(MODE "arm")
+endif()
+
 # Mode-specific build options
 if(MODE STREQUAL "arm" OR MODE STREQUAL "hybrid")
     message(STATUS "Building for ARM Cortex-M33 mode or Hybrid mode")
-
-    set(PICO_PLATFORM "rp2350-arm-s")
-    set(PICO_COMPILER "pico_arm_cortex_m33_gcc")
-
-
 
     # ARM-specific compilation flags
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mcpu=cortex-m33 -mthumb")
@@ -49,7 +51,7 @@ if(MODE STREQUAL "arm" OR MODE STREQUAL "hybrid")
 elseif(MODE STREQUAL "riscv")
     message(STATUS "Building for RISC-V mode")
 
-    # Don't include Pico SDK for RISC-V builds
+    # RISC-V specific flags and tools
     set(CMAKE_SYSTEM_NAME Generic)
     set(CMAKE_SYSTEM_PROCESSOR riscv32)
     set(CMAKE_C_COMPILER riscv32-unknown-elf-gcc)
@@ -57,7 +59,6 @@ elseif(MODE STREQUAL "riscv")
     # RISC-V specific compilation flags
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=rv32im -mabi=ilp32")
 
-    # Add RISC-V sources
     list(APPEND BOOT_FILES "${BOOT_DIR}/stage2-risc.S")
 
     # Output file names
@@ -71,7 +72,7 @@ endif()
 # Add the source files to the executable
 add_executable(${OUTPUT_ELF} ${BOOT_FILES} ${KERNEL_FILES})
 
-# Link the Pico SDK standard library (important to include pico/stdlib.h)
+# Link the Pico SDK standard library
 target_link_libraries(${OUTPUT_ELF} pico_stdlib)
 
 # Add extra outputs (UF2, BIN, HEX)

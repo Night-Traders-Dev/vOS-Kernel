@@ -9,18 +9,29 @@ set(MODE "arm" CACHE STRING "Choose the build mode: arm, riscv, or hybrid")
 # Set the path to the Pico SDK (for ARM mode)
 set(PICO_SDK_PATH "/opt/pico-sdk")
 
+# Ensure Pico SDK is initialized
+if (NOT EXISTS ${PICO_SDK_PATH}/pico_sdk_init.cmake)
+    message(FATAL_ERROR "Pico SDK not found at ${PICO_SDK_PATH}")
+endif()
+
+# Include the Pico SDK
+include(${PICO_SDK_PATH}/pico_sdk_init.cmake)
+pico_sdk_init()  # MUST be called before adding any source files
+
+# Set default compilation flags
+set(CMAKE_C_FLAGS "-O2 -Wall")
+
+# Set directories (Relative to the root project directory, not the build directory)
+set(BOOT_DIR "${CMAKE_SOURCE_DIR}/Boot")
+set(LIB_DIR "${CMAKE_SOURCE_DIR}/Lib")
+
+# Define source files (relative to the root project directory)
+set(BOOT_FILES "${BOOT_DIR}/stage1.c")
+set(KERNEL_FILES "${LIB_DIR}/kernel.c")
+
 # Mode-specific build options
 if(MODE STREQUAL "arm" OR MODE STREQUAL "hybrid")
     message(STATUS "Building for ARM Cortex-M33 mode or Hybrid mode")
-
-    # Include the Pico SDK only for ARM mode
-    if (NOT EXISTS ${PICO_SDK_PATH}/pico_sdk_init.cmake)
-        message(FATAL_ERROR "Pico SDK not found at ${PICO_SDK_PATH}")
-    endif()
-
-    # Include the Pico SDK for ARM mode
-    include(${PICO_SDK_PATH}/pico_sdk_init.cmake)
-    pico_sdk_init()
 
     set(CMAKE_SYSTEM_NAME Generic)
     set(CMAKE_SYSTEM_PROCESSOR arm)

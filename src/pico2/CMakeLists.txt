@@ -1,25 +1,20 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.13)
 
 # Project information
-project(Multimode_Bootloader C ASM)
+project(Multimode_Bootloader C CXX ASM)
 
-# Define options for the different modes
-set(MODE "arm" CACHE STRING "Choose the build mode: arm, riscv, or hybrid")
+set(PICO_SDK_PATH "/opt/pico-sdk/")
 
-# Set the path to the Pico SDK (for ARM mode)
-set(PICO_SDK_PATH "/opt/pico-sdk")
-
-# Ensure Pico SDK is initialized
-if (NOT EXISTS ${PICO_SDK_PATH}/pico_sdk_init.cmake)
-    message(FATAL_ERROR "Pico SDK not found at ${PICO_SDK_PATH}")
-endif()
-
-# Include the Pico SDK
 include(${PICO_SDK_PATH}/pico_sdk_init.cmake)
-pico_sdk_init()  # MUST be called before adding any source files
-
+set(PICO_BOARD "pico2")
+#set(CMAKE_CXX_STANDARD 11)
+#set(CMAKE_C_STANDARD 11)
 # Set default compilation flags
 set(CMAKE_C_FLAGS "-O2 -Wall")
+
+# Initialize the Pico SDK
+pico_sdk_init()
+
 
 # Set directories (Relative to the root project directory, not the build directory)
 set(BOOT_DIR "${CMAKE_SOURCE_DIR}/Boot")
@@ -33,9 +28,10 @@ set(KERNEL_FILES "${LIB_DIR}/kernel.c")
 if(MODE STREQUAL "arm" OR MODE STREQUAL "hybrid")
     message(STATUS "Building for ARM Cortex-M33 mode or Hybrid mode")
 
-    set(CMAKE_SYSTEM_NAME Generic)
-    set(CMAKE_SYSTEM_PROCESSOR arm)
-    set(CMAKE_C_COMPILER arm-none-eabi-gcc)
+    set(PICO_PLATFORM "rp2350-arm-s")
+    set(PICO_COMPILER "pico_arm_cortex_m33_gcc")
+
+
 
     # ARM-specific compilation flags
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mcpu=cortex-m33 -mthumb")
@@ -74,6 +70,12 @@ endif()
 
 # Add the source files to the executable
 add_executable(${OUTPUT_ELF} ${BOOT_FILES} ${KERNEL_FILES})
+
+# Link the Pico SDK standard library (important to include pico/stdlib.h)
+target_link_libraries(${OUTPUT_ELF} pico_stdlib)
+
+# Add extra outputs (UF2, BIN, HEX)
+pico_add_extra_outputs(${OUTPUT_ELF})
 
 # Linker script
 set(LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/linker.ld")

@@ -27,7 +27,7 @@ This project requires the Raspberry Pi Pico SDK. Make sure it is properly instal
 
 **Raspberry Pi Pico SDK**
 
-**ARM Cortex-M33 and RISC-V Hazard 3-based Raspberry Pi Pico 2 boards**
+**ARM Cortex-M33** and **RISC-V Hazard 3-based Raspberry Pi Pico 2 boards**
 
 
 ### Setting Up the Pico SDK
@@ -84,7 +84,7 @@ picotool load -f qraft-risc.uf2
 
 The system is designed around the Raft consensus algorithm, where nodes communicate over UART. Each node consists of two boards: one handles intensive consensus logic (ARM) while the other handles I/O tasks (RISC-V).
 
-ARM Board (qraft-arm.c)
+### ARM Board (qraft-arm.c)
 
 - **Leader Election**: If no leader is detected, the ARM board starts a leader election process.
 

@@ -42,8 +42,6 @@ void uart_receive(char *buffer, size_t len) {
 
 // Relay messages to the ARM board
 void relay_message_to_arm(const char *message) {
-    // This function relays a received message to the ARM board
-    // For simplicity, we'll assume this communication uses UART on uart0 for ARM communication
     uart_puts(uart0, message);  // Forwarding message to ARM
     printf("Relaying message to ARM: %s\n", message);
 }

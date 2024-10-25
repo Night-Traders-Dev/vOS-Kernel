@@ -35,5 +35,5 @@ elseif(${BUILD_TYPE} STREQUAL "RISC-V")
     pico_add_extra_outputs(qraft-risc)
 
 else()
-    message(FATAL_ERROR "Unknown BUILD_TYPE: ${BUILD_TYPE}. Must be either ARM or RISC-V.")
-endif
+    message(FATAL_ERROR "Unknown BUILD_TYPE: ${BUILD_TYPE}")
+endif()

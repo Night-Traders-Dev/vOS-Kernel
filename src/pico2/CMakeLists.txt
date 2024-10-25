@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_FLAGS "-O2 -Wall")
 
 set(PICO_BOARD pico2)
-set(PICO_PLATFORM rp2350)
+set(PICO_PLATFORM rp2350-riscv)
 
 set(PICO_SDK_PATH "/opt/pico-sdk/")
 

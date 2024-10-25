@@ -97,7 +97,7 @@ The system is designed around the Raft consensus algorithm, where nodes communic
 
 - **Heartbeat Monitoring**: The RISC-V board monitors the leader’s heartbeat. If no heartbeat is received within a specified timeout, it triggers the ARM board to start a new leader election.
 
-Message Relaying: The RISC-V board relays Raft messages (e.g., vote requests, log replication commands) between nodes via UART and communicates with the ARM board.
+- **Message Relaying**: The RISC-V board relays Raft messages (e.g., vote requests, log replication commands) between nodes via UART and communicates with the ARM board.
 
 
 ### Inter-Board Communication
@@ -111,9 +111,9 @@ Message Relaying: The RISC-V board relays Raft messages (e.g., vote requests, lo
 
 You can modify various parameters such as the heartbeat timeout and election timeout in the source files to adjust the system's behavior:
 
-HEARTBEAT_INTERVAL: The interval (in milliseconds) at which the leader sends heartbeat messages to followers.
+- **HEARTBEAT_INTERVAL**: The interval (in milliseconds) at which the leader sends heartbeat messages to followers.
 
-ELECTION_TIMEOUT: The time (in milliseconds) a follower waits before starting an election if no heartbeat is received.
+- **ELECTION_TIMEOUT**: The time (in milliseconds) a follower waits before starting an election if no heartbeat is received.
 
 
 These parameters can be found in both qraft-arm.c and qraft-risc.c.

@@ -2,6 +2,11 @@
 
 Welcome to the vOS Kernel! This project is a simple ARM64 microkernel designed for educational purposes and experimentation with operating system concepts. The kernel is capable of booting in a QEMU environment and handling basic input and output through UART.
 
+> [!CAUTION]
+> * WIP
+> * Beware there be dragons!!!
+
+
 # Table of Contents
 
 * Features
@@ -47,13 +52,6 @@ make build
 
 This will assemble, compile, and link the bootloader and kernel, producing the necessary ELF file for QEMU.
 
-To build with the UEFI bootloader, use:
-> [!CAUTION]
-> * currently UEFI is not supported
-> * using `make build` works as default and compatibility
-
-make build_uefi
-
 To clean the build files:
 
 make clean
@@ -75,23 +73,8 @@ make run
 
 # Pico 2 Support
 
-In addition to QEMU, the vOS Kernel now supports running on the **RP2350** (Pico 2) microcontroller, which features a **hybrid architecture** with ARM Cortex-M33 and RISC-V cores. The kernel is capable of running in **ARM-only**, **RISC-V-only**, or **Hybrid** modes where both cores are utilized.
+In addition to QEMU, the vOS Kernel supports planned for the **RP2350** (Pico 2) microcontroller, which features a **hybrid architecture** with ARM Cortex-M33 and RISC-V cores. The kernel will be capable of running in **ARM** or **RISC-V**
 
-### Key Features for Pico 2:
-* **ARM Cortex-M33** and **RISC-V Hazard3** cores can be booted individually or simultaneously in hybrid mode.
-* The bootloader dynamically selects the mode (ARM, RISC-V, or Hybrid) based on a command passed via UART.
-* The kernel auto-detects the mode and prints the appropriate message via UART.
-
-### Building for Pico 2:
-To build the bootloader and kernel for **Pico 2**, you can specify the mode during the build process using:
-
-make MODE=arm    # For ARM-only mode make MODE=riscv  # For RISC-V-only mode make MODE=hybrid # For Hybrid mode
-
-Each mode will compile the appropriate second-stage bootloader and link the kernel for that architecture.
-
-To clean the Pico 2 build files:
-
-make clean
 
 # Key Components
 
@@ -112,9 +95,5 @@ Contributions are welcome! If you'd like to contribute to vOS Kernel, please fol
 # License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
-
-> [!WARNING]
-> There be dragons<br>This code is still early and WIP
-
 
 

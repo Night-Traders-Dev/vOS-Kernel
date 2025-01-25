@@ -3,28 +3,26 @@
 #include "syscalls.h"
 #include "vstring.h"
 #include "fs.h"
+#include <stdint.h>
 
-#define STACK_SIZE 0x200 // Size of each task stack
-static uint8_t task_stacks[MAX_TASKS][STACK_SIZE]; // Static memory for task stacks
+static uint8_t task_stacks[MAX_TASKS][STACK_SIZE];
+static task_t tasks[MAX_TASKS];
+static uint32_t task_count = 0;
+static uint32_t current_task = 0;
 
-static task_t tasks[MAX_TASKS]; // Array to hold tasks
-static uint32_t task_count = 0; // Number of tasks created
-static uint32_t current_task = 0; // Index of the currently running task
-
+// Kernel tasks
 void shell_task(void) {
-    print_string("[task] Shell Task started.\n"); // Debug message
-
-    char buffer[128]; // Shell input buffer
+    char buffer[128];
     while (1) {
-        print_string("$ ");             // Display prompt
-        uart_read_string(buffer, 128);  // Wait for input
-        handle_command(buffer);         // Process the command
+        print_string("$ ");
+        uart_read_string(buffer, 128);
+        handle_command(buffer);
     }
 }
 
 // Kernel entry point
 void kernel_entry(void) {
-    char buffer[128];  // Buffer for storing the user input
+    char buffer[128];
 
     print_string("[kernel] Kernel initialized.\n");
 
@@ -42,10 +40,11 @@ void kernel_entry(void) {
     fs_dir_size("/", (strlength(kernel_fs) + strlength(data_fs)));
 
     task_create(shell_task);
+    scheduler();
 
-    while (1) {
-        scheduler();
-    }
+//    while (1) {
+//        scheduler();
+//    }
 }
 
 void task_create(void (*task_entry)(void)) {
@@ -136,7 +135,7 @@ void context_switch(task_t *prev_task, task_t *next_task) {
     __asm__ volatile("mov sp, %0" :: "r"(next_task->stack_pointer) : "memory");
 
     print_string("[kernel] Jumping to task...\n");
-    ((void (*)(void))next_task->stack_pointer[-1])();
+    ((void (*)(void))((uintptr_t)next_task->stack_pointer[-1]))();
 }
 
 

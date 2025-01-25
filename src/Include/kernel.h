@@ -15,11 +15,13 @@
 // Maximum number of tasks
 #define MAX_TASKS 5
 
+#define STACK_SIZE 0x200 // Size of each task stack
+
 // Task state
 typedef enum {
-    TASK_RUNNING,
-    TASK_READY,
-    TASK_BLOCKED
+    RUNNING,
+    READY,
+    BLOCKED
 } task_state_t;
 
 // Task structure

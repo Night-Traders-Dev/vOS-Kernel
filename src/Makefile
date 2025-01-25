@@ -25,14 +25,14 @@ endif
 clean:
 	@echo "Cleaning build files...\n" | tee -a dmesg
 	@date "+[%Y-%m-%d %H:%M:%S] Cleaning build files..." >> dmesg
-	rm -f $(BOOT_DIR)/boot.o $(LIB_DIR)/kernel.o $(LIB_DIR)/command_handler.o $(LIB_DIR)/syscalls.o boot.elf $(BUILD_DIR)/boot.elf $(LIB_DIR)/fs.o $(LIB_DIR)/vstring.o
+	rm -f $(BOOT_DIR)/boot.o $(LIB_DIR)/kernel.o $(LIB_DIR)/command_handler.o $(LIB_DIR)/syscalls.o boot.elf $(BUILD_DIR)/boot.elf $(LIB_DIR)/fs.o $(LIB_DIR)/vstring.o $(LIB_DIR)/scheduler.o
 	@echo "Clean complete.\n" | tee -a dmesg
 	@date "+[%Y-%m-%d %H:%M:%S] Clean complete." >> dmesg
 
-build: $(LIB_DIR)/kernel.o $(LIB_DIR)/command_handler.o $(LIB_DIR)/syscalls.o $(LIB_DIR)/fs.o $(LIB_DIR)/vstring.o $(BOOT_DIR)/boot.o
+build: $(LIB_DIR)/kernel.o $(LIB_DIR)/command_handler.o $(LIB_DIR)/syscalls.o $(LIB_DIR)/fs.o $(LIB_DIR)/vstring.o $(BOOT_DIR)/boot.o $(LIB_DIR)/scheduler.o
 	@echo "Compiling and linking bootloader and kernel...\n" | tee -a dmesg
 	@date "+[%Y-%m-%d %H:%M:%S] Compiling and linking bootloader and kernel..." >> dmesg
-	$(LD) -T kernel.ld -o $(BUILD_DIR)/boot.elf $(BOOT_DIR)/boot.o $(LIB_DIR)/kernel.o $(LIB_DIR)/command_handler.o $(LIB_DIR)/syscalls.o $(LIB_DIR)/fs.o $(LIB_DIR)/vstring.o
+	$(LD) -T kernel.ld -o $(BUILD_DIR)/boot.elf $(BOOT_DIR)/boot.o $(LIB_DIR)/kernel.o $(LIB_DIR)/command_handler.o $(LIB_DIR)/syscalls.o $(LIB_DIR)/fs.o $(LIB_DIR)/vstring.o $(LIB_DIR)/scheduler.o
 	@echo "Build complete.\n" | tee -a dmesg
 	@date "+[%Y-%m-%d %H:%M:%S] Build complete." >> dmesg
 
@@ -60,6 +60,12 @@ $(LIB_DIR)/vstring.o: $(LIB_DIR)/vstring.c
 	@echo "Compiling vstring...\n" | tee -a dmesg
 	@date "+[%Y-%m-%d %H:%M:%S] Compiling vstring..." >> dmesg
 	$(CC) -c -o $(LIB_DIR)/vstring.o $(LIB_DIR)/vstring.c $(CFLAGS)
+
+$(LIB_DIR)/scheduler.o: $(LIB_DIR)/scheduler.c
+	@echo "Compiling scheduler...\n" | tee -a dmesg
+	@date "+[%Y-%m-%d %H:%M:%S] Compiling scheduler..." >> dmesg
+	$(CC) -c -o $(LIB_DIR)/scheduler.o $(LIB_DIR)/scheduler.c $(CFLAGS)
+
 
 ifeq ($(BOOT_SRC), $(BOOT_DIR)/boot.c)
 $(BOOT_DIR)/boot.o: $(BOOT_DIR)/boot.c

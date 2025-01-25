@@ -3,11 +3,7 @@
 #include "syscalls.h"
 #include "vstring.h"
 #include "fs.h"
-
-static uint8_t task_stacks[MAX_TASKS][STACK_SIZE];
-static task_t tasks[MAX_TASKS];
-static uint32_t task_count = 0;
-static uint32_t current_task = 0;
+#include "scheduler.h"
 
 // Kernel tasks
 void shell_task(void) {
@@ -16,12 +12,22 @@ void shell_task(void) {
         print_string("$ ");
         uart_read_string(buffer, sizeof(buffer));
         handle_command(buffer);
+        task_yield();
     }
 }
 
 
 // Kernel entry point
 void kernel_entry(void) {
+    static int kernel_initialized = 0;
+    if (kernel_initialized) {
+        print_string("[kernel] Kernel is already initialized.\n");
+//        task_yield();
+        return;
+    }
+
+    kernel_initialized = 1;
+
     print_string("\033[2J\033[H");
     print_string("[kernel] Kernel initialized.\n");
     print_string("Welcome to vOS\n\n");
@@ -36,82 +42,10 @@ void kernel_entry(void) {
     fs_write("data.fs", data_fs, strlength(data_fs));
     fs_dir_size("/", (strlength(kernel_fs) + strlength(data_fs)));
 
-    task_create(shell_task);
+    task_create(shell_task, 1);
     scheduler();
 }
 
-void task_create(void (*task_entry)(void)) {
-    if (task_count >= MAX_TASKS) {
-        return;
-    }
-
-    task_t *task = &tasks[task_count];
-    task->task_entry = task_entry;
-    task->state = READY;
-
-    task->stack_base = (uint32_t *)task_stacks[task_count];
-    task->stack_pointer = task->stack_base + (STACK_SIZE / sizeof(uint32_t));
-
-    *(--task->stack_pointer) = (uintptr_t)task_entry;
-
-    task_count++;
-}
-
-void scheduler(void) {
-    static int cycles_since_last_check = 0;
-    const int check_interval = 5;
-
-    uint32_t prev_task_idx = current_task;
-
-    if (cycles_since_last_check >= check_interval) {
-        cycles_since_last_check = 0;
-
-        int active_task_count = 0;
-        for (int i = 0; i < task_count; i++) {
-            if (tasks[i].state == READY) {
-                active_task_count++;
-            }
-        }
-
-        if (active_task_count <= 1) {
-            return;
-        }
-    }
-
-    cycles_since_last_check++;
-
-    // Round-robin or focus on most recently created task
-    if (task_count > 1) {
-        int next_task_idx = -1;
-        for (int i = task_count - 1; i >= 0; i--) {
-            if (tasks[i].state == READY) {
-                next_task_idx = i;
-                print_string(tasks[i]);
-                print_string(" ready\n");
-                break;
-            }
-        }
-
-        if (next_task_idx != -1) {
-            current_task = next_task_idx;
-        } else {
-            current_task = (current_task + 1) % task_count;
-        }
-    }
-
-    if (prev_task_idx != current_task) {
-        task_t *prev_task = &tasks[prev_task_idx];
-        task_t *next_task = &tasks[current_task];
-        context_switch(prev_task, next_task);
-    }
-}
-
-
-void context_switch(task_t *prev_task, task_t *next_task) {
-    __asm__ volatile("mov %0, sp" : "=r"(prev_task->stack_pointer) : : "memory");
-    __asm__ volatile("mov sp, %0" :: "r"(next_task->stack_pointer) : "memory");
-    ((void (*)(void))((uintptr_t)next_task->stack_pointer[-1]))();
-}
 
 
 char uart_read_char(void) {

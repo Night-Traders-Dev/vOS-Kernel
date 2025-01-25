@@ -1,6 +1,4 @@
 #include "fs.h"
-#include "syscalls.h"
-#include "vstring.h"
 
 // fs opcodes
 // 0 = directory
@@ -81,15 +79,15 @@ int fs_read(const char *filename, char *buffer, int size) {
 
 
 void fs_ls(void) {
-    syscall_print_string("[shell] Listing files and directories:\n");
+    print_string("[shell] Listing files and directories:\n");
     for (int i = 0; i < MAX_FILES; i++) {
         if (filesystem[i].name[0] != '\0') {
-            syscall_print_string(filesystem[i].name);
-            syscall_print_string(" - ");
+            print_string(filesystem[i].name);
+            print_string(" - ");
             char buffer[128];
-            syscall_print_string(int_to_string(filesystem[i].size, buffer));
-            syscall_print_string(" bytes");
-            syscall_print_string(filesystem[i].type == 0 ? " [DIR]\n" : " [FILE]\n");
+            print_string(int_to_string(filesystem[i].size, buffer));
+            print_string(" bytes");
+            print_string(filesystem[i].type == 0 ? " [DIR]\n" : " [FILE]\n");
         }
     }
 }

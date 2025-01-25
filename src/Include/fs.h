@@ -4,6 +4,7 @@
 #define MAX_FILES 10
 #define MAX_FILENAME_LEN 32
 #define MAX_FILE_SIZE 1024
+#include "vstring.h"
 
 typedef struct {
     char name[MAX_FILENAME_LEN];

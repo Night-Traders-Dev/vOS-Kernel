@@ -1,7 +1,5 @@
 #include "scheduler.h"
-#include "vstring.h"
 
-// Idle task to run when no other tasks are READY
 static void idle_task(void) {
     while (1) {
         print_string("idle\n");
@@ -9,7 +7,6 @@ static void idle_task(void) {
     }
 }
 
-// Create a new task with the given entry point and priority
 int task_create(void (*task_entry)(void), uint8_t priority) {
     if (task_count >= MAX_TASKS) {
         print_string("[kernel] Error: Maximum task limit reached.\n");
@@ -17,8 +14,6 @@ int task_create(void (*task_entry)(void), uint8_t priority) {
     }
 
     int task_id = -1;
-
-    // Search for a TERMINATED task to reuse its slot
     for (int i = 0; i < MAX_TASKS; i++) {
         if (tasks[i].state == TERMINATED) {
             task_id = i;
@@ -27,7 +22,6 @@ int task_create(void (*task_entry)(void), uint8_t priority) {
     }
 
     if (task_id == -1) {
-        // No reusable task found, use the next available slot
         task_id = task_count++;
     }
 
@@ -38,24 +32,16 @@ int task_create(void (*task_entry)(void), uint8_t priority) {
     task->priority = priority;
     task->stack_base = (uint32_t *)task_stacks[task_id];
 
-    // Set the stack pointer to the top of the stack
     task->stack_pointer = task->stack_base + (STACK_SIZE / sizeof(uint32_t));
-
-    // Push the task's entry point (PC) onto the stack
     *(--task->stack_pointer) = (uintptr_t)task_entry;
-
-    // Push the Link Register (LR) with a default value (NULL or a handler)
     *(--task->stack_pointer) = 0;
 
-    // Push default values for R0-R12 (general-purpose registers)
     for (int i = 0; i < CONTEXT_SAVE_SIZE; i++) {
         *(--task->stack_pointer) = 0;
     }
 
-    // Align the stack pointer to 8 bytes
     task->stack_pointer = (uint32_t *)((uintptr_t)task->stack_pointer & ~0x7);
 
-    // Debug print
     print_string("[kernel] Task created with ID: ");
     print_int(task_id);
     print_string(", Priority: ");
@@ -65,7 +51,7 @@ int task_create(void (*task_entry)(void), uint8_t priority) {
     return 0; // Indicate success
 }
 
-// Scheduler to switch between tasks
+// Scheduler to switch between tasks based on the time slice
 void scheduler(void) {
     uint32_t prev_task_idx = current_task;
     int next_task_idx = -1;
@@ -110,17 +96,11 @@ void scheduler(void) {
 
 // Perform a context switch between two tasks
 void context_switch(task_t *prev_task, task_t *next_task) {
-    // Save the stack pointer of the current task
     __asm__ volatile("mov %0, sp" : "=r"(prev_task->stack_pointer) : : "memory");
-
-    // Load the stack pointer of the next task
     __asm__ volatile("mov sp, %0" :: "r"(next_task->stack_pointer) : "memory");
-
-    // Jump to the next task's entry point
     ((void (*)(void))((uintptr_t)next_task->stack_pointer[-1]))();
 }
 
-// Yield the current task to allow the scheduler to run
 void task_yield(void) {
     tasks[current_task].state = READY; // Mark the current task as READY
     scheduler();

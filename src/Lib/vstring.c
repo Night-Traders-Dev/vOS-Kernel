@@ -1,10 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
-#include <stddef.h>
 #include "vstring.h"
-#include "kernel.h"
-
 
 // Function to print a string to UART
 void print_string(const char *str) {

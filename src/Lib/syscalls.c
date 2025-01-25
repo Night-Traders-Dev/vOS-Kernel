@@ -1,7 +1,4 @@
 #include "syscalls.h"
-#include "kernel.h"
-#include "fs.h"
-#include "vstring.h"
 
 void syscall_handler(uint64_t syscall_number, uint64_t arg1, uint64_t arg2, uint64_t arg3) {
     switch (syscall_number) {

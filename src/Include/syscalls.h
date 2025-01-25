@@ -2,6 +2,9 @@
 #define SYSCALLS_H
 
 #include <stdint.h>
+#include "kernel.h"
+#include "fs.h"
+#include "vstring.h"
 
 // Syscall numbers
 #define SYSCALL_PRINT_STRING 1

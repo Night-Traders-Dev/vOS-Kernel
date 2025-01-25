@@ -1,28 +1,9 @@
-#include "command_handler.h"
 #include "kernel.h"
-#include "syscalls.h"
-#include "vstring.h"
-#include "fs.h"
-#include "scheduler.h"
-
-volatile uint32_t system_ticks = 0;
-
-void increment_system_ticks(void) {
-    system_ticks++;
-}
-
-bool timeout_occurred(uint32_t start_tick, uint32_t timeout_ticks) {
-    uint32_t current_tick = system_ticks;
-    return (current_tick - start_tick >= timeout_ticks);
-}
-
-
 
 // Kernel tasks
 void shell_task(void) {
     char buffer[128];
     uint32_t timeout_ticks = 5000; // Example: 5 seconds
-
     while (1) {
         print_string("$ ");
         uart_read_string(buffer, sizeof(buffer), timeout_ticks);
@@ -36,7 +17,6 @@ void shell_task(void) {
         task_yield();
     }
 }
-
 
 // Kernel entry point
 void kernel_entry(void) {
@@ -52,7 +32,8 @@ void kernel_entry(void) {
     print_string("[kernel] Kernel initialized.\n");
     print_string("Welcome to vOS\n\n");
 
-
+    // Initialize the SysTick timer
+    timer_init();
 
     char *kernel_fs = "Kernel Dummy File";
     char *data_fs = "Data Dummy File";
@@ -62,22 +43,21 @@ void kernel_entry(void) {
         system_off();
     }
 
-    if (fs_write("data.fs", data_fs, strlength(data_fs)) < 0 || 
-        fs_write("kernel.fs", kernel_fs, strlength(kernel_fs)) < 0 || 
+    if (fs_write("data.fs", data_fs, strlength(data_fs)) < 0 ||
+        fs_write("kernel.fs", kernel_fs, strlength(kernel_fs)) < 0 ||
         fs_dir_size("/", strlength(kernel_fs) + strlength(data_fs)) < 0) {
         print_string("[kernel] Filesystem operations failed.\n");
         system_off();
     }
 
-    task_create(shell_task, 1);
+    task_create(shell_task, 100);
 
     while (1) {
         scheduler();
     }
 }
 
-
-
+// UART read character (blocking)
 char uart_read_char(void) {
     char c;
     do {
@@ -87,7 +67,7 @@ char uart_read_char(void) {
     return c;
 }
 
-
+// UART read character with timeout
 int uart_read_char_with_timeout(char *c, uint32_t timeout_ticks) {
     uint32_t start_tick = system_ticks;
 
@@ -103,7 +83,7 @@ int uart_read_char_with_timeout(char *c, uint32_t timeout_ticks) {
     }
 }
 
-
+// UART read string with timeout
 void uart_read_string(char *buffer, int max_length, uint32_t timeout_ticks) {
     int i = 0;
     char c;
@@ -133,7 +113,7 @@ void uart_read_string(char *buffer, int max_length, uint32_t timeout_ticks) {
     buffer[i] = '\0';
 }
 
-
+// System shutdown function
 void system_off(void) {
     print_string("[kernel] vOS Kernel Shutdown...\n");
     register const uint64_t function_id asm("x0") = QEMU_SHUTDOWN_PORT;

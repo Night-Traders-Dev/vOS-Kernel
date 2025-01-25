@@ -1,44 +1,60 @@
 #include "timer.h"
 #include "scheduler.h"
+#include "kernel.h"
 
 uint32_t system_ticks = 0;
-uint32_t SystemCoreClock = 0;  // Must be initialized externally
+uint32_t SystemCoreClock = 0;
 
 bool scheduler_initialized(void) {
-    return (task_count > 0);
+    return (task_count > 0);  // Check if tasks are initialized
 }
 
 void timer_init(void) {
     if (SystemCoreClock == 0) {
         print_string("Error: SystemCoreClock not initialized. Setting default value.\n");
-        SystemCoreClock = 16000000;  // Default to 16 MHz if not initialized
+        SystemCoreClock = 16000000;  // Default to 16 MHz
     }
 
-    print_string("Timer Started\n");
+    print_string("Timer Starting\n");
 
-    SYSTICK_LOAD = (SystemCoreClock / 1000) - 1;  // Set reload value for 1ms interval
-    SYSTICK_VAL = 0;  // Clear the current value register
-    SYSTICK_CTRL = SYSTICK_CTRL_CLKSOURCE_Msk |    // Use system clock
-                   SYSTICK_CTRL_TICKINT_Msk |     // Enable interrupt
-                   SYSTICK_CTRL_ENABLE_Msk;      // Enable the timer
+    char buffer[32];
+    int_to_string(SystemCoreClock, buffer);
+    print_string("SystemCoreClock: ");
+    print_string(buffer);
+    print_string("\n");
 
-    // Fault detection for SysTick configuration
-    if ((SYSTICK_CTRL & SYSTICK_CTRL_ENABLE_Msk) == 0) {
-        print_string("Error: Failed to enable SysTick timer.\n");
-        return;  // Exit to prevent further issues
+    // Configure the custom timer for a 1ms interval
+    TIMER_LOAD = (SystemCoreClock / 1000) - 1;  // Set reload value
+    print_string("Configuring TIMER_LOAD\n");
+
+    TIMER_VAL = 0;  // Clear the current value register
+    print_string("Clearing TIMER_VAL\n");
+
+    // Enable the custom timer and configure for periodic mode with interrupt
+    TIMER_CTRL = TIMER_CTRL_ENABLE_Msk | 
+                 TIMER_CTRL_MODE_Msk | 
+                 TIMER_CTRL_INTEN_Msk;
+
+    print_string("Enabling TIMER_CTRL\n");
+
+    // Verify if the timer is enabled
+    if ((TIMER_CTRL & TIMER_CTRL_ENABLE_Msk) == 0) {
+        print_string("Error: Failed to enable timer.\n");
+        return;
     }
 
-    if (SYSTICK_LOAD == 0) {
-        print_string("Error: SysTick reload value is 0. Timer cannot function.\n");
-        return;  // Exit as the timer will not generate interrupts
+    if (TIMER_LOAD == 0) {
+        print_string("Error: TIMER_LOAD value is 0. Timer cannot function.\n");
+        return;
     }
 
-    print_string("SysTick Timer Configured Successfully\n");
+    print_string("Custom Timer Configured Successfully\n");
 
+    // Check if the scheduler is initialized
     if (!scheduler_initialized()) {
         print_string("Error: Scheduler initialization failed. Halting.\n");
         while (1) {
-            print_string("System Hanging\n");
+            system_off();
         }
     }
 
@@ -53,11 +69,11 @@ void increment_system_ticks(void) {
     system_ticks++;
 }
 
-// SysTick interrupt handler
-void SysTick_Handler(void) {
+// Timer interrupt handler
+void Timer_Handler(void) {
     increment_system_ticks();  // Increment the global tick counter
 
-    // Scheduler call for task management
+    // Call the scheduler to manage tasks
     scheduler();
 }
 

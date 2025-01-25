@@ -3,8 +3,7 @@
 // Kernel tasks
 void shell_task(void) {
     char buffer[128];
-    print_string("Shell\n");
-    const uint32_t timeout_ticks = 5000; // Example: 5 seconds
+    const uint32_t timeout_ticks = 5000;
 
     while (1) {
         print_string("$ ");
@@ -16,7 +15,6 @@ void shell_task(void) {
             print_string("[kernel] No input received.\n");
         }
 
-        task_yield();
     }
 }
 
@@ -27,11 +25,6 @@ void kernel_entry(void) {
         print_string("[kernel] Kernel is already initialized.\n");
         task_yield();
     }
-
-    kernel_initialized = true;
-    SystemCoreClock = 16000000;
-    timer_init();
-    print_string("[kernel] Kernel initialized.\n");
 
     const char *kernel_fs = "Kernel Dummy File";
     const char *data_fs = "Data Dummy File";
@@ -64,14 +57,10 @@ void kernel_entry(void) {
         system_off();
     }
 
+    print_string("[kernel] Kernel initialized...starting Task and Timer\n");
     print_string("\033[2J\033[H"); // Clear screen and reset cursor
     print_string("Welcome to vOS\n\n");
 
-
-    // Create the shell task
-    #define SHELL_TASK_PRIORITY 100
-    task_create(shell_task, SHELL_TASK_PRIORITY);
-    task_yield();
 
     // Kernel main loop
 //    while (1) {

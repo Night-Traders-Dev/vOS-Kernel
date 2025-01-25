@@ -121,15 +121,8 @@ void context_switch(task_t *prev_task, task_t *next_task) {
 }
 
 void task_yield(void) {
-    // Debug log to indicate task yield
     print_string("[scheduler] Task yielding execution...\n");
-
-    // Mark the current task as READY
     tasks[current_task].state = READY;
-
-    // Call the scheduler to determine the next task to run
     scheduler();
-
-    // Debug log to indicate the scheduler has completed
     print_string("[scheduler] Task rescheduled.\n");
 }

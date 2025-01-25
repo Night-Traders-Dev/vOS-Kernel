@@ -4,30 +4,36 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-// Define the base address for SysTick registers
-#define SYSTICK_BASE 0xE000E010
-#define SYSTICK_LOAD  (*(volatile uint32_t *)(SYSTICK_BASE + 0x00))  // Load value register
-#define SYSTICK_VAL   (*(volatile uint32_t *)(SYSTICK_BASE + 0x04))  // Current value register
-#define SYSTICK_CTRL  (*(volatile uint32_t *)(SYSTICK_BASE + 0x08))  // Control and status register
+// Define timer-specific constants
+#define TIMER_BASE 0x40000000  // Example base address for the custom timer
+#define TIMER_LOAD  (*(volatile uint32_t *)(TIMER_BASE + 0x00))  // Load value register
+#define TIMER_VAL   (*(volatile uint32_t *)(TIMER_BASE + 0x04))  // Current value register
+#define TIMER_CTRL  (*(volatile uint32_t *)(TIMER_BASE + 0x08))  // Control register
 
-// Define bit fields for the SysTick control register
-#define SYSTICK_CTRL_CLKSOURCE_Msk   (1 << 2)  // Select the clock source (external or system)
-#define SYSTICK_CTRL_TICKINT_Msk     (1 << 1)  // Enable interrupt
-#define SYSTICK_CTRL_ENABLE_Msk      (1 << 0)  // Enable the timer
+// Bit fields for the custom timer control register
+#define TIMER_CTRL_ENABLE_Msk      (1U << 0)  // Enable the timer
+#define TIMER_CTRL_MODE_Msk        (1U << 1)  // Mode selection (e.g., periodic or one-shot)
+#define TIMER_CTRL_INTEN_Msk       (1U << 2)  // Enable timer interrupt
 
-#define TIMEOUT_THRESHOLD 5000  // Example timeout threshold in milliseconds
+// Timeout threshold for generic usage (adjust as needed)
+#define TIMEOUT_THRESHOLD_MS 5000  // Timeout in milliseconds
+
+// Timer state macros
+#define TIMER_IS_RUNNING()         (TIMER_CTRL & TIMER_CTRL_ENABLE_Msk)  // Check if timer is running
+#define TIMER_SET_MODE_PERIODIC()  (TIMER_CTRL |= TIMER_CTRL_MODE_Msk)   // Set timer to periodic mode
+#define TIMER_SET_MODE_ONESHOT()   (TIMER_CTRL &= ~TIMER_CTRL_MODE_Msk)  // Set timer to one-shot mode
 
 // Function prototypes
-extern void timer_init(void);                 // Initialize the timer
-extern void increment_system_ticks(void);     // Increment the global system tick counter
-extern bool timeout_occurred(uint32_t start_tick, uint32_t timeout_ticks); // Timeout check
-__attribute__((weak)) void SysTick_Handler(void);  // SysTick interrupt handler (weak to allow override)
+void timer_init(void);                          // Initialize the custom timer
+void increment_system_ticks(void);              // Increment the global system tick counter
+bool timeout_occurred(uint32_t start_tick, uint32_t timeout_ticks);  // Check for timeout
+__attribute__((weak)) void Timer_Handler(void); // Custom timer interrupt handler (weak for override)
 
-// Macros for error checking
+// Macro for error checking
 #define IS_CLOCK_INITIALIZED() (SystemCoreClock != 0)  // Check if SystemCoreClock is initialized
 
 // External variables
-extern uint32_t system_ticks;     // System ticks counter
+extern uint32_t system_ticks;     // Global system tick counter
 extern uint32_t SystemCoreClock;  // System clock frequency (in Hz). Must be initialized before using the timer.
 
 #endif // TIMER_H

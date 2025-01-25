@@ -10,10 +10,11 @@
 
 // QEMU Shutdown Port
 #define QEMU_SHUTDOWN_PORT 0x84000008
+#define SHELL_TASK_PRIORITY 100
 
 // Function prototypes
 void kernel_entry(void);
-char uart_read_char(void);
-void uart_read_string(char *buffer, int max_length, uint32_t timeout_ticks);
-void system_off(void);
+extern char uart_read_char(void);
+extern void uart_read_string(char *buffer, int max_length, uint32_t timeout_ticks);
+extern void system_off(void);
 #endif // KERNEL_H

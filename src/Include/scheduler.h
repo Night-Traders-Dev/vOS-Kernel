@@ -26,7 +26,7 @@ typedef struct {
     int priority;
 } task_t;
 
-void task_create(void (*task_entry)(void), uint8_t priority);
+int task_create(void (*task_entry)(void), uint8_t priority);
 void scheduler(void);
 void context_switch(task_t *prev_task, task_t *next_task);
 void task_yield(void);

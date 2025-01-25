@@ -5,13 +5,34 @@
 #include "fs.h"
 #include "scheduler.h"
 
+volatile uint32_t system_ticks = 0;
+
+void increment_system_ticks(void) {
+    system_ticks++;
+}
+
+bool timeout_occurred(uint32_t start_tick, uint32_t timeout_ticks) {
+    uint32_t current_tick = system_ticks;
+    return (current_tick - start_tick >= timeout_ticks);
+}
+
+
+
 // Kernel tasks
 void shell_task(void) {
     char buffer[128];
+    uint32_t timeout_ticks = 5000; // Example: 5 seconds
+
     while (1) {
         print_string("$ ");
-        uart_read_string(buffer, sizeof(buffer));
-        handle_command(buffer);
+        uart_read_string(buffer, sizeof(buffer), timeout_ticks);
+
+        if (buffer[0] != '\0') {
+            handle_command(buffer);
+        } else {
+            print_string("[kernel] No input received.\n");
+        }
+
         task_yield();
     }
 }
@@ -66,30 +87,52 @@ char uart_read_char(void) {
     return c;
 }
 
-void uart_read_string(char *buffer, int max_length) {
+
+int uart_read_char_with_timeout(char *c, uint32_t timeout_ticks) {
+    uint32_t start_tick = system_ticks;
+
+    while (1) {
+        if (!(UART_FR & (1 << 4))) { // UART FIFO is not empty
+            *c = (char)UART_DR;
+            return 0; // Character read successfully
+        }
+
+        if (timeout_occurred(start_tick, timeout_ticks)) {
+            return -1; // Timeout occurred
+        }
+    }
+}
+
+
+void uart_read_string(char *buffer, int max_length, uint32_t timeout_ticks) {
     int i = 0;
     char c;
 
     while (i < max_length - 1) {
-        c = uart_read_char();
+        if (uart_read_char_with_timeout(&c, timeout_ticks) == 0) { // Char received
+            if (c == '\r' || c == '\n') {
+                buffer[i] = '\0';
+                print_string("\n");
+                break;
+            }
 
-        if (c == '\r' || c == '\n') {
-            buffer[i] = '\0';
-            print_string("\n");
+            if (c == '\b' && i > 0) {
+                i--;
+                print_string("\033[D \033[D");
+            } else if (c >= 32 && c < 127) {
+                buffer[i++] = c;
+                UART_DR = c;
+            }
+        } else {
+            buffer[0] = '\0'; // Timeout, return empty buffer
+            print_string("[kernel] UART read timeout.\n");
             break;
-        }
-
-        if (c == '\b' && i > 0) {
-            i--;
-            print_string("\033[D \033[D");
-        } else if (c >= 32 && c < 127) {
-            buffer[i++] = c;
-            UART_DR = c;
         }
     }
 
     buffer[i] = '\0';
 }
+
 
 void system_off(void) {
     print_string("[kernel] vOS Kernel Shutdown...\n");

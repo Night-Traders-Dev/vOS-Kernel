@@ -7,10 +7,10 @@ static void idle_task(void) {
     }
 }
 
-void task_create(void (*task_entry)(void), uint8_t priority) {
+int task_create(void (*task_entry)(void), uint8_t priority) {
     if (task_count >= MAX_TASKS) {
         print_string("[kernel] Error: Maximum task limit reached.\n");
-        return; // Exit if no more tasks can be created
+        return -1; // Indicate failure
     }
 
     int task_id = -1;
@@ -58,7 +58,11 @@ void task_create(void (*task_entry)(void), uint8_t priority) {
     print_string(", Priority: ");
     print_int(priority);
     print_string(".\n");
+
+    return 0; // Indicate success
 }
+
+
 
 void scheduler(void) {
     uint32_t prev_task_idx = current_task;
@@ -75,7 +79,8 @@ void scheduler(void) {
 
     // Fall back to an idle task if no READY tasks are found
     if (next_task_idx == -1) {
-        idle_task();
+        task_create(idle_task, 99);
+//        idle_task();
     }
 
     current_task = next_task_idx;

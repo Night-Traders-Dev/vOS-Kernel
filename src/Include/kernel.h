@@ -12,12 +12,16 @@
 // QEMU Shutdown Port
 #define QEMU_SHUTDOWN_PORT 0x84000008
 
+#define TIMEOUT_THRESHOLD 1000000
+
+// Extern system_ticks declaration
+extern volatile uint32_t system_ticks;
 
 // Function prototypes
 void kernel_entry(void);
 char uart_read_char(void);
-void uart_read_string(char *buffer, int max_length);
+void uart_read_string(char *buffer, int max_length, uint32_t timeout_ticks);
 void system_off(void);
-void handle_command(const char *command);
+bool timeout_occurred(uint32_t start_tick, uint32_t timeout_ticks);
 
 #endif // KERNEL_H

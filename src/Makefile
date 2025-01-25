@@ -1,5 +1,4 @@
 BUILD_DIR = ../build
-
 BOOT_DIR = Boot
 LIB_DIR = Lib
 INCLUDE_DIR = Include
@@ -9,9 +8,19 @@ AS = aarch64-linux-gnu-as
 LD = aarch64-linux-gnu-ld
 CFLAGS = -ffreestanding -nostdlib -fpic -fno-stack-protector -I$(INCLUDE_DIR)
 
-# Target rules
+BOOTLOADER = asm
+BOOT_SRC = $(BOOT_DIR)/boot.S
+
 all: clean build run
 
+ifeq ($(BOOTLOADER), "asm")
+	@echo "Asm bootloader selected\n" | tee -a dmesg
+	BOOT_SRC := $(BOOT_DIR)/boot.S
+endif
+ifeq ($(BOOTLOADER), "cxx")
+	@echo "C bootloader selected\n" | tee -a dmesg
+	BOOT_SRC := $(BOOT_DIR)/boot.c
+endif
 
 clean:
 	@echo "Cleaning build files...\n" | tee -a dmesg
@@ -52,11 +61,16 @@ $(LIB_DIR)/vstring.o: $(LIB_DIR)/vstring.c
 	@date "+[%Y-%m-%d %H:%M:%S] Compiling vstring..." >> dmesg
 	$(CC) -c -o $(LIB_DIR)/vstring.o $(LIB_DIR)/vstring.c $(CFLAGS)
 
-
+ifeq ($(BOOT_SRC), $(BOOT_DIR)/boot.c)
+$(BOOT_DIR)/boot.o: $(BOOT_DIR)/boot.c
+	$(CC) -c -o $(BOOT_DIR)/boot.o $(BOOT_DIR)/boot.c $(CFLAGS)
+else
 $(BOOT_DIR)/boot.o: $(BOOT_DIR)/boot.S
 	$(AS) -o $(BOOT_DIR)/boot.o $(BOOT_DIR)/boot.S
+endif
 
 run:
+	@echo "vOS built using $(BOOT_SRC)...\n"
 	@echo "Running QEMU...\n" | tee -a dmesg
 	@date "+[%Y-%m-%d %H:%M:%S] Running QEMU..." >> dmesg
 	qemu-system-aarch64 -M virt -cpu cortex-a53 -nographic -serial mon:stdio -kernel $(BUILD_DIR)/boot.elf
@@ -65,12 +79,5 @@ debug:
 	@echo "Running QEMU in debug mode\nConnect gdb...\n" | tee -a dmesg
 	@date "+[%Y-%m-%d %H:%M:%S] Running QEMU in debug mode..." >> dmesg
 	qemu-system-aarch64 -s -S -M virt -cpu cortex-a53 -nographic -serial mon:stdio -kernel $(BUILD_DIR)/boot.elf
-
-###Running in debug requires gdb-multiarch
-###clean, build, and run debug
-###In a second terminal cd to the kernel repo
-###cd into build and run gdb-mutiarch boot.elf
-###in gdb type `target remote localhost:1234`
-
 
 .PHONY: clean build run

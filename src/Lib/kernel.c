@@ -3,7 +3,9 @@
 // Kernel tasks
 void shell_task(void) {
     char buffer[128];
-    uint32_t timeout_ticks = 5000; // Example: 5 seconds
+    print_string("Shell\n");
+    const uint32_t timeout_ticks = 5000; // Example: 5 seconds
+
     while (1) {
         print_string("$ ");
         uart_read_string(buffer, sizeof(buffer), timeout_ticks);
@@ -20,48 +22,68 @@ void shell_task(void) {
 
 // Kernel entry point
 void kernel_entry(void) {
-    static int kernel_initialized = 0;
+    static bool kernel_initialized = false;
     if (kernel_initialized) {
         print_string("[kernel] Kernel is already initialized.\n");
         task_yield();
     }
 
-    kernel_initialized = 1;
-
-    print_string("\033[2J\033[H");
+    kernel_initialized = true;
+    SystemCoreClock = 16000000;
+    timer_init();
     print_string("[kernel] Kernel initialized.\n");
+
+    const char *kernel_fs = "Kernel Dummy File";
+    const char *data_fs = "Data Dummy File";
+
+    // Initialize filesystem
+    fs_init();
+    if (fs_mkdir("/") < 0) {
+        print_string("[kernel] Failed to create root directory.\n");
+        system_off();
+    }
+    if (fs_create("kernel.fs") < 0) {
+        print_string("[kernel] Failed to create kernel.fs.\n");
+        system_off();
+    }
+    if (fs_create("data.fs") < 0) {
+        print_string("[kernel] Failed to create data.fs.\n");
+        system_off();
+    }
+
+    if (fs_write("data.fs", data_fs, strlength(data_fs)) < 0) {
+        print_string("[kernel] Failed to write to data.fs.\n");
+        system_off();
+    }
+    if (fs_write("kernel.fs", kernel_fs, strlength(kernel_fs)) < 0) {
+        print_string("[kernel] Failed to write to kernel.fs.\n");
+        system_off();
+    }
+    if (fs_dir_size("/", strlength(kernel_fs) + strlength(data_fs)) < 0) {
+        print_string("[kernel] Failed to calculate directory size.\n");
+        system_off();
+    }
+
+    print_string("\033[2J\033[H"); // Clear screen and reset cursor
     print_string("Welcome to vOS\n\n");
 
-    // Initialize the SysTick timer
-    timer_init();
 
-    char *kernel_fs = "Kernel Dummy File";
-    char *data_fs = "Data Dummy File";
-    fs_init();
-    if (fs_mkdir("/") < 0 || fs_create("kernel.fs") < 0 || fs_create("data.fs") < 0) {
-        print_string("[kernel] Filesystem operations failed.\n");
-        system_off();
-    }
+    // Create the shell task
+    #define SHELL_TASK_PRIORITY 100
+    task_create(shell_task, SHELL_TASK_PRIORITY);
+    task_yield();
 
-    if (fs_write("data.fs", data_fs, strlength(data_fs)) < 0 ||
-        fs_write("kernel.fs", kernel_fs, strlength(kernel_fs)) < 0 ||
-        fs_dir_size("/", strlength(kernel_fs) + strlength(data_fs)) < 0) {
-        print_string("[kernel] Filesystem operations failed.\n");
-        system_off();
-    }
-
-    task_create(shell_task, 100);
-
-    while (1) {
-        scheduler();
-    }
+    // Kernel main loop
+//    while (1) {
+//        task_yield(); // Let the task scheduler manage execution
+//    }
 }
 
 // UART read character (blocking)
 char uart_read_char(void) {
     char c;
     do {
-        while (UART_FR & (1 << 4)) {}
+        while (UART_FR & (1 << 4)) {} // Wait for UART FIFO to be not empty
         c = (char)UART_DR;
     } while (c == 0);
     return c;
@@ -98,10 +120,10 @@ void uart_read_string(char *buffer, int max_length, uint32_t timeout_ticks) {
 
             if (c == '\b' && i > 0) {
                 i--;
-                print_string("\033[D \033[D");
-            } else if (c >= 32 && c < 127) {
+                print_string("\b \b"); // Backspace, overwrite with space, backspace again
+            } else if (c >= 32 && c < 127) { // Printable ASCII characters
                 buffer[i++] = c;
-                UART_DR = c;
+                UART_DR = c; // Echo back the character
             }
         } else {
             buffer[0] = '\0'; // Timeout, return empty buffer

@@ -54,8 +54,10 @@ int task_create(void (*task_entry)(void), uint8_t priority) {
     return 0; // Indicate success
 }
 
+
 // Scheduler to switch between tasks based on the time slice
 void scheduler(void) {
+    print_string("Scheduler...debug/n");
     uint32_t prev_task_idx = current_task;
     int next_task_idx = -1;
     int highest_priority = -1;
@@ -74,28 +76,42 @@ void scheduler(void) {
 
         if (!idle_task_created) {
             idle_task_created = 1;
-            task_create(idle_task, 0); // Lowest priority
+            print_string("[kernel] No READY tasks. Creating idle task.\n");
+            task_create(idle_task, 0); // Create idle task with the lowest priority
         }
 
         next_task_idx = task_count - 1; // Assume idle task is the last created
     }
 
+    // Update the current task
     current_task = next_task_idx;
 
-    // Switch context if necessary
+    // Check if a context switch is required
     if (prev_task_idx != current_task) {
         task_t *prev_task = &tasks[prev_task_idx];
         task_t *next_task = &tasks[current_task];
 
-        print_string("[kernel] Switching from task ");
+        // Debug log for task switching
+        print_string("[kernel] Switching context from task ");
         print_int(prev_task_idx);
-        print_string(" to task ");
+        print_string(" (Priority: ");
+        print_int(prev_task->priority);
+        print_string(") to task ");
+        print_int(current_task);
+        print_string(" (Priority: ");
+        print_int(next_task->priority);
+        print_string(").\n");
+
+        // Perform context switch
+        context_switch(prev_task, next_task);
+    } else {
+        // Log if no task switch is necessary
+        print_string("[kernel] No task switch needed. Continuing task ");
         print_int(current_task);
         print_string(".\n");
-
-        context_switch(prev_task, next_task);
     }
 }
+
 
 // Perform a context switch between two tasks
 void context_switch(task_t *prev_task, task_t *next_task) {
@@ -105,6 +121,15 @@ void context_switch(task_t *prev_task, task_t *next_task) {
 }
 
 void task_yield(void) {
-    tasks[current_task].state = READY; // Mark the current task as READY
+    // Debug log to indicate task yield
+    print_string("[scheduler] Task yielding execution...\n");
+
+    // Mark the current task as READY
+    tasks[current_task].state = READY;
+
+    // Call the scheduler to determine the next task to run
     scheduler();
+
+    // Debug log to indicate the scheduler has completed
+    print_string("[scheduler] Task rescheduled.\n");
 }

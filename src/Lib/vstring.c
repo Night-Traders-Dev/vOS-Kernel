@@ -100,40 +100,6 @@ int strlength(const char *str) {
     return length;
 }
 
-char* int_to_string(int num, char *buffer) {
-    int i = 0;
-    int is_negative = 0;
-
-    // Handle negative numbers
-    if (num < 0) {
-        is_negative = 1;
-        num = -num;
-    }
-
-    // Generate digits in reverse order
-    do {
-        buffer[i++] = (num % 10) + '0';
-        num /= 10;
-    } while (num > 0);
-
-    // Add minus sign for negative numbers
-    if (is_negative) {
-        buffer[i++] = '-';
-    }
-
-    // Null-terminate the string
-    buffer[i] = '\0';
-
-    // Reverse the string
-    for (int j = 0; j < i / 2; j++) {
-        char temp = buffer[j];
-        buffer[j] = buffer[i - j - 1];
-        buffer[i - j - 1] = temp;
-    }
-
-    return buffer;
-}
-
 
 // Minimal implementation of strcpy
 char *strcpy(char *dest, const char *src) {
@@ -159,4 +125,90 @@ int strcmp(const char *str1, const char *str2) {
         str2++;
     }
     return *(unsigned char *)str1 - *(unsigned char *)str2;
+}
+
+
+char* int_to_string(int num, char *buffer) {
+    int is_negative = 0;
+    int i = 0;
+
+    // Handle 0 explicitly
+    if (num == 0) {
+        buffer[i++] = '0';
+        buffer[i] = '\0';
+        return buffer;
+    }
+
+    // Handle negative numbers
+    if (num < 0) {
+        is_negative = 1;
+        num = -num;
+    }
+
+    // Convert the number to a string (reverse order)
+    while (num > 0) {
+        buffer[i++] = (num % 10) + '0';
+        num /= 10;
+    }
+
+    // Add the negative sign if needed
+    if (is_negative) {
+        buffer[i++] = '-';
+    }
+
+    // Null-terminate the string
+    buffer[i] = '\0';
+
+    // Reverse the string
+    for (int j = 0, k = i - 1; j < k; j++, k--) {
+        char temp = buffer[j];
+        buffer[j] = buffer[k];
+        buffer[k] = temp;
+    }
+
+    return buffer;
+}
+
+void print_int(int value) {
+    char buffer[12]; // Enough to store the string representation of a 32-bit integer, including the sign
+    int i = 0;
+    int is_negative = 0;
+
+    // Handle 0 explicitly
+    if (value == 0) {
+        buffer[i++] = '0';
+        buffer[i] = '\0';
+        print_string(buffer);
+        return;
+    }
+
+    // Handle negative numbers
+    if (value < 0) {
+        is_negative = 1;
+        value = -value;
+    }
+
+    // Convert the number to a string (reverse order)
+    while (value > 0) {
+        buffer[i++] = (value % 10) + '0'; // Extract the last digit and convert to char
+        value /= 10;                     // Remove the last digit
+    }
+
+    // Add the negative sign if necessary
+    if (is_negative) {
+        buffer[i++] = '-';
+    }
+
+    // Null-terminate the string
+    buffer[i] = '\0';
+
+    // Reverse the string to get the correct order
+    for (int j = 0, k = i - 1; j < k; j++, k--) {
+        char temp = buffer[j];
+        buffer[j] = buffer[k];
+        buffer[k] = temp;
+    }
+
+    // Print the string
+    print_string(buffer);
 }

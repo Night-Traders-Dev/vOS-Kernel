@@ -4,18 +4,29 @@
 #include "vstring.h"
 #include "fs.h"
 
+static task_t tasks[MAX_TASKS]; // Array to hold tasks
+static uint32_t task_count = 0; // Number of tasks created
+static uint32_t current_task = 0; // Index of the currently running task
+
+void shell_task(void) {
+    char buffer[128]; // Shell input buffer
+    while (1) {
+        print_string("$ ");             // Display prompt
+        uart_read_string(buffer, 128);  // Wait for input
+        handle_command(buffer);         // Process the command
+    }
+}
+
+
 // Kernel entry point
 void kernel_entry(void) {
     char buffer[128];  // Buffer for storing the user input
 
-    // Print a message indicating the kernel is running
     print_string("[kernel] Kernel initialized.\n");
 
-    // Clear console
     print_string("\033[2J\033[H");
     print_string("Welcome to vOS\n\n");
 
-    // Create test file
     fs_init();
     fs_mkdir("/");
     fs_create("kernel.fs");
@@ -26,16 +37,50 @@ void kernel_entry(void) {
     fs_write("data.fs", data_fs, strlength(data_fs));
     fs_dir_size("/", (strlength(kernel_fs) + strlength(data_fs)));
 
-
-
-    // Main kernel loop to capture input
+    task_create(shell_task);
     while (1) {
-        print_string("$ ");
-
-        uart_read_string(buffer, 128);  // Wait until Enter is pressed
-
-        handle_command(buffer);  // Process the command using handle_command
+        scheduler();
     }
+}
+
+// Create a new task
+void task_create(void (*task_entry)(void)) {
+    if (task_count >= MAX_TASKS) return;  // Prevent creating too many tasks
+
+    task_t *task = &tasks[task_count];
+    task->task_entry = task_entry;
+    task->state = TASK_READY;
+    task->stack_base = (uint32_t *) 0x1000 + (task_count * 0x100); // Allocate stack
+    task->stack_pointer = task->stack_base + 0x100; // Stack pointer points to top
+
+    // Setup stack for task
+    *(--task->stack_pointer) = (uint32_t) task_entry;  // Set entry point as return address
+    task_count++;
+}
+
+// Simple round-robin scheduler
+void scheduler(void) {
+    uint32_t prev_task_idx = current_task;
+    current_task = (current_task + 1) % task_count;  // Round-robin scheduler
+
+    if (prev_task_idx != current_task) {
+        task_t *prev_task = &tasks[prev_task_idx];
+        task_t *next_task = &tasks[current_task];
+        context_switch(prev_task, next_task);
+    }
+}
+
+// Context switch between two tasks
+void context_switch(task_t *prev_task, task_t *next_task) {
+    // Save the state of the previous task (context saving)
+    prev_task->stack_pointer = (uint32_t *)__builtin_frame_address(0);
+
+    // Restore the state of the next task (context restoring)
+    __asm__ volatile(
+        "mov sp, %0\n"
+        :
+        : "r"(next_task->stack_pointer)
+    );
 }
 
 
@@ -66,7 +111,6 @@ void uart_read_string(char *buffer, int max_length) {
 
         if (c == '\b' && i > 0) {      // Handle backspace
             i--;
-//            print_string("\b \b");     // Remove the last character from the buffer
             print_string("\033[D \033[D");
         } else if (c >= 32 && c < 127) { // Only allow printable characters
             buffer[i++] = c;           // Store the character in the buffer
@@ -76,7 +120,6 @@ void uart_read_string(char *buffer, int max_length) {
 
     buffer[i] = '\0';  // Null-terminate the string just in case
 }
-
 
 // Function to shut down QEMU (via hypervisor call)
 void system_off(void) {

@@ -12,13 +12,18 @@ static uint32_t current_task = 0;
 
 // Kernel tasks
 void shell_task(void) {
+    print_string("[task] Shell Task started.\n");
     char buffer[128];
     while (1) {
         print_string("$ ");
-        uart_read_string(buffer, 128);
-        handle_command(buffer);
+        uart_read_string(buffer, sizeof(buffer));
+        print_string("[task] Command received: ");
+        print_string(buffer);
+        print_string("\n");
     }
 }
+
+
 
 // Kernel entry point
 void kernel_entry(void) {
@@ -41,10 +46,6 @@ void kernel_entry(void) {
 
     task_create(shell_task);
     scheduler();
-
-//    while (1) {
-//        scheduler();
-//    }
 }
 
 void task_create(void (*task_entry)(void)) {
@@ -62,21 +63,17 @@ void task_create(void (*task_entry)(void)) {
     *(--task->stack_pointer) = (uintptr_t)task_entry;
 
     task_count++;
-
-    print_int((uintptr_t)task->stack_pointer);
 }
 
 void scheduler(void) {
-    static int cycles_since_last_check = 0; // Track scheduler cycles
-    const int check_interval = 5;          // How often to check task count
+    static int cycles_since_last_check = 0;
+    const int check_interval = 5;
 
     uint32_t prev_task_idx = current_task;
 
-    // Check task count periodically
     if (cycles_since_last_check >= check_interval) {
         cycles_since_last_check = 0;
 
-        // Count active tasks
         int active_task_count = 0;
         for (int i = 0; i < task_count; i++) {
             if (tasks[i].state == READY) {
@@ -84,9 +81,7 @@ void scheduler(void) {
             }
         }
 
-        // If only one task is running, no need to switch
         if (active_task_count <= 1) {
-            print_string("[kernel] Only one task active. Monitoring for new tasks...\n");
             return;
         }
     }
@@ -95,7 +90,6 @@ void scheduler(void) {
 
     // Round-robin or focus on most recently created task
     if (task_count > 1) {
-        // Find the most recently created READY task
         int next_task_idx = -1;
         for (int i = task_count - 1; i >= 0; i--) {
             if (tasks[i].state == READY) {
@@ -107,18 +101,10 @@ void scheduler(void) {
         if (next_task_idx != -1) {
             current_task = next_task_idx;
         } else {
-            current_task = (current_task + 1) % task_count; // Fallback to round-robin
+            current_task = (current_task + 1) % task_count;
         }
     }
 
-    print_string("[kernel] Switching tasks...\n");
-    print_string("Previous Task Index: ");
-    print_int(prev_task_idx); // Debug previous task
-    print_string("\nCurrent Task Index: ");
-    print_int(current_task);  // Debug current task
-    print_string("\n");
-
-    // Perform context switch if needed
     if (prev_task_idx != current_task) {
         task_t *prev_task = &tasks[prev_task_idx];
         task_t *next_task = &tasks[current_task];
@@ -128,18 +114,12 @@ void scheduler(void) {
 
 
 void context_switch(task_t *prev_task, task_t *next_task) {
-    print_string("[kernel] Context Switch: Saving state...\n");
     __asm__ volatile("mov %0, sp" : "=r"(prev_task->stack_pointer) : : "memory");
-
-    print_string("[kernel] Restoring state...\n");
     __asm__ volatile("mov sp, %0" :: "r"(next_task->stack_pointer) : "memory");
-
-    print_string("[kernel] Jumping to task...\n");
     ((void (*)(void))((uintptr_t)next_task->stack_pointer[-1]))();
 }
 
 
-// Function to read a single character from UART
 char uart_read_char(void) {
     char c;
     do {
@@ -149,12 +129,10 @@ char uart_read_char(void) {
     return c;
 }
 
-// Function to read a string from UART, waits for Enter key
 void uart_read_string(char *buffer, int max_length) {
     int i = 0;
     char c;
 
-    // Read characters until newline or max length is reached
     while (i < max_length - 1) {
         c = uart_read_char(); // Get a character from UART
 

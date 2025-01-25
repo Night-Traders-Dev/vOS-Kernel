@@ -1,87 +1,69 @@
 #include "scheduler.h"
 #include "vstring.h"
 
+static void idle_task(void) {
+    while (1) {
+        __asm__ volatile("wfi"); // Wait for interrupt (low power mode)
+    }
+}
+
 void task_create(void (*task_entry)(void), uint8_t priority) {
+    if (task_count >= MAX_TASKS) {
+        print_string("[kernel] Error: Maximum task limit reached.\n");
+        return; // Exit if no more tasks can be created
+    }
+
+    int task_id = -1;
+
+    // Search for a TERMINATED task to reuse its slot
     for (int i = 0; i < MAX_TASKS; i++) {
         if (tasks[i].state == TERMINATED) {
-            // Reuse this task slot
-            tasks[i].task_entry = task_entry;
-            tasks[i].state = READY;
-            tasks[i].priority = priority;
-            tasks[i].stack_base = (uint32_t *)task_stacks[i];
-            tasks[i].stack_pointer = tasks[i].stack_base + (STACK_SIZE / sizeof(uint32_t));
-            *(--tasks[i].stack_pointer) = (uintptr_t)task_entry;
-
-            for (int j = 0; j < CONTEXT_SAVE_SIZE; j++) {
-                *(--tasks[i].stack_pointer) = 0; // Placeholder for saved registers
-            }
-
-            print_string("[kernel] Reused task ID: ");
-            print_int(i);
-            print_string(", Priority: ");
-            print_int(priority);
-            print_string(".\n");
-            task_yield();
-//            return;
+            task_id = i;
+            break;
         }
     }
 
-    if (task_count >= MAX_TASKS) {
-        print_string("[kernel] Error: Maximum task limit reached.\n");
-        task_yield();
-//        return;
+    if (task_id == -1) {
+        // No reusable task found, use the next available slot
+        task_id = task_count++;
     }
 
-    // Create a new task
-    task_t *task = &tasks[task_count];
+    // Initialize the task
+    task_t *task = &tasks[task_id];
     task->task_entry = task_entry;
     task->state = READY;
     task->priority = priority;
-    task->stack_base = (uint32_t *)task_stacks[task_count];
+    task->stack_base = (uint32_t *)task_stacks[task_id];
+
+    // Set the stack pointer to the top of the stack
     task->stack_pointer = task->stack_base + (STACK_SIZE / sizeof(uint32_t));
+
+    // Push the task's entry point (PC) onto the stack
     *(--task->stack_pointer) = (uintptr_t)task_entry;
 
+    // Push the Link Register (LR) with a default value (NULL or a handler)
+    *(--task->stack_pointer) = 0;
+
+    // Push default values for R0-R12 (general-purpose registers)
     for (int i = 0; i < CONTEXT_SAVE_SIZE; i++) {
         *(--task->stack_pointer) = 0;
     }
 
+    // Align the stack pointer to 8 bytes
+    task->stack_pointer = (uint32_t *)((uintptr_t)task->stack_pointer & ~0x7);
+
+    // Debug print
     print_string("[kernel] Task created with ID: ");
-    print_int(task_count);
+    print_int(task_id);
     print_string(", Priority: ");
     print_int(priority);
     print_string(".\n");
-
-    task_count++;
 }
 
-
 void scheduler(void) {
-    static int cycles_since_last_check = 0;
-    const int check_interval = 5;
-
     uint32_t prev_task_idx = current_task;
     int next_task_idx = -1;
     int highest_priority = -1;
-
-    // Check for active tasks every few cycles
-    if (cycles_since_last_check >= check_interval) {
-        cycles_since_last_check = 0;
-
-        int active_task_count = 0;
-        for (int i = 0; i < task_count; i++) {
-            if (tasks[i].state == READY) {
-                active_task_count++;
-            }
-        }
-
-        // If there is only one active task, no need to switch
-        if (active_task_count <= 1) {
-            task_yield();
-//            return;
-        }
-    }
-
-    cycles_since_last_check++;
 
     // Find the task with the highest priority that is READY
     for (int i = 0; i < task_count; i++) {
@@ -91,25 +73,14 @@ void scheduler(void) {
         }
     }
 
-    // Fall back to round-robin if no task is READY or priorities are equal
+    // Fall back to an idle task if no READY tasks are found
     if (next_task_idx == -1) {
-        next_task_idx = (current_task + 1) % task_count;
-        int scanned_tasks = 0;
-        while (tasks[next_task_idx].state != READY) {
-            next_task_idx = (next_task_idx + 1) % task_count;
-            scanned_tasks++;
-
-            // Prevent infinite loop in case all tasks are BLOCKED or TERMINATED
-            if (scanned_tasks >= task_count) {
-                task_yield();
-//                return; // No valid task to switch to
-            }
-        }
+        idle_task();
     }
 
     current_task = next_task_idx;
 
-    // Switch context if the current task is different from the previous one
+    // Switch context if necessary
     if (prev_task_idx != current_task) {
         task_t *prev_task = &tasks[prev_task_idx];
         task_t *next_task = &tasks[current_task];

@@ -36,4 +36,6 @@ static task_t tasks[MAX_TASKS];
 static uint32_t task_count = 0;
 static uint32_t current_task = 0;
 
+static void idle_task(void);
+
 #endif // SCHEDULER_H

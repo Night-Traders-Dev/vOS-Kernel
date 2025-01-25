@@ -22,9 +22,7 @@ void kernel_entry(void) {
     static int kernel_initialized = 0;
     if (kernel_initialized) {
         print_string("[kernel] Kernel is already initialized.\n");
-        system_off();
         task_yield();
-        return;
     }
 
     kernel_initialized = 1;
@@ -51,7 +49,10 @@ void kernel_entry(void) {
     }
 
     task_create(shell_task, 1);
-    scheduler();
+
+    while (1) {
+        scheduler();
+    }
 }
 
 

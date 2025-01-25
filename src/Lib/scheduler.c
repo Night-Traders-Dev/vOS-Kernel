@@ -21,14 +21,15 @@ void task_create(void (*task_entry)(void), uint8_t priority) {
             print_string(", Priority: ");
             print_int(priority);
             print_string(".\n");
-
-            return;
+            task_yield();
+//            return;
         }
     }
 
     if (task_count >= MAX_TASKS) {
         print_string("[kernel] Error: Maximum task limit reached.\n");
-        return;
+        task_yield();
+//        return;
     }
 
     // Create a new task
@@ -75,7 +76,8 @@ void scheduler(void) {
 
         // If there is only one active task, no need to switch
         if (active_task_count <= 1) {
-            return;
+            task_yield();
+//            return;
         }
     }
 
@@ -99,7 +101,8 @@ void scheduler(void) {
 
             // Prevent infinite loop in case all tasks are BLOCKED or TERMINATED
             if (scanned_tasks >= task_count) {
-                return; // No valid task to switch to
+                task_yield();
+//                return; // No valid task to switch to
             }
         }
     }

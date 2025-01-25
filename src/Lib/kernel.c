@@ -22,7 +22,8 @@ void kernel_entry(void) {
     static int kernel_initialized = 0;
     if (kernel_initialized) {
         print_string("[kernel] Kernel is already initialized.\n");
-//        task_yield();
+        system_off();
+        task_yield();
         return;
     }
 
@@ -32,15 +33,22 @@ void kernel_entry(void) {
     print_string("[kernel] Kernel initialized.\n");
     print_string("Welcome to vOS\n\n");
 
-    fs_init();
-    fs_mkdir("/");
-    fs_create("kernel.fs");
+
+
     char *kernel_fs = "Kernel Dummy File";
     char *data_fs = "Data Dummy File";
-    fs_write("kernel.fs", kernel_fs, strlength(kernel_fs));
-    fs_create("data.fs");
-    fs_write("data.fs", data_fs, strlength(data_fs));
-    fs_dir_size("/", (strlength(kernel_fs) + strlength(data_fs)));
+    fs_init();
+    if (fs_mkdir("/") < 0 || fs_create("kernel.fs") < 0 || fs_create("data.fs") < 0) {
+        print_string("[kernel] Filesystem operations failed.\n");
+        system_off();
+    }
+
+    if (fs_write("data.fs", data_fs, strlength(data_fs)) < 0 || 
+        fs_write("kernel.fs", kernel_fs, strlength(kernel_fs)) < 0 || 
+        fs_dir_size("/", strlength(kernel_fs) + strlength(data_fs)) < 0) {
+        print_string("[kernel] Filesystem operations failed.\n");
+        system_off();
+    }
 
     task_create(shell_task, 1);
     scheduler();

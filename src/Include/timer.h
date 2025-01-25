@@ -27,6 +27,6 @@ void SysTick_Handler(void);            // SysTick interrupt handler
 bool timeout_occurred(uint32_t start_tick, uint32_t timeout_ticks);  // Timeout check
 
 // External variables
-uint32_t system_ticks;    // System ticks counter
-uint32_t SystemCoreClock;          // System clock frequency (in Hz)
+extern uint32_t system_ticks;    // System ticks counter
+extern uint32_t SystemCoreClock;          // System clock frequency (in Hz)
 #endif // TIMER_H

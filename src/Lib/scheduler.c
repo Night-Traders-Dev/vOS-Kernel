@@ -1,5 +1,8 @@
 #include "scheduler.h"
 
+uint32_t task_count = 0;
+uint32_t current_task = 0;
+
 static void idle_task(void) {
     while (1) {
         print_string("idle\n");

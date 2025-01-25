@@ -32,10 +32,11 @@ int task_create(void (*task_entry)(void), uint8_t priority);
 void scheduler(void);
 void context_switch(task_t *prev_task, task_t *next_task);
 void task_yield(void);
-uint32_t task_count = 0;
-uint32_t current_task = 0;
 static uint8_t task_stacks[MAX_TASKS][STACK_SIZE];
 static task_t tasks[MAX_TASKS];
 static void idle_task(void);
+
+extern uint32_t task_count;
+extern uint32_t current_task;
 
 #endif // SCHEDULER_H

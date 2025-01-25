@@ -1,5 +1,9 @@
 #include "timer.h"
 
+uint32_t system_ticks = 0;
+uint32_t SystemCoreClock = 0;
+
+
 // Initialize the SysTick timer
 void timer_init(void) {
     // Set the SysTick timer to interrupt every 1ms

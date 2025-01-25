@@ -12,7 +12,7 @@
 // QEMU Shutdown Port
 #define QEMU_SHUTDOWN_PORT 0x84000008
 
-#define TIMEOUT_THRESHOLD 1000000
+#define TIMEOUT_THRESHOLD 5000
 
 // Extern system_ticks declaration
 extern volatile uint32_t system_ticks;

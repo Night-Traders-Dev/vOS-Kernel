@@ -1,12 +1,15 @@
 #include "scheduler.h"
 #include "vstring.h"
 
+// Idle task to run when no other tasks are READY
 static void idle_task(void) {
     while (1) {
+        print_string("idle\n");
         __asm__ volatile("wfi"); // Wait for interrupt (low power mode)
     }
 }
 
+// Create a new task with the given entry point and priority
 int task_create(void (*task_entry)(void), uint8_t priority) {
     if (task_count >= MAX_TASKS) {
         print_string("[kernel] Error: Maximum task limit reached.\n");
@@ -62,8 +65,7 @@ int task_create(void (*task_entry)(void), uint8_t priority) {
     return 0; // Indicate success
 }
 
-
-
+// Scheduler to switch between tasks
 void scheduler(void) {
     uint32_t prev_task_idx = current_task;
     int next_task_idx = -1;
@@ -77,10 +79,16 @@ void scheduler(void) {
         }
     }
 
-    // Fall back to an idle task if no READY tasks are found
+    // Fall back to the idle task if no READY tasks are found
     if (next_task_idx == -1) {
-        task_create(idle_task, 99);
-//        idle_task();
+        static int idle_task_created = 0;
+
+        if (!idle_task_created) {
+            idle_task_created = 1;
+            task_create(idle_task, 0); // Lowest priority
+        }
+
+        next_task_idx = task_count - 1; // Assume idle task is the last created
     }
 
     current_task = next_task_idx;
@@ -100,14 +108,20 @@ void scheduler(void) {
     }
 }
 
+// Perform a context switch between two tasks
 void context_switch(task_t *prev_task, task_t *next_task) {
+    // Save the stack pointer of the current task
     __asm__ volatile("mov %0, sp" : "=r"(prev_task->stack_pointer) : : "memory");
+
+    // Load the stack pointer of the next task
     __asm__ volatile("mov sp, %0" :: "r"(next_task->stack_pointer) : "memory");
+
+    // Jump to the next task's entry point
     ((void (*)(void))((uintptr_t)next_task->stack_pointer[-1]))();
 }
 
-
+// Yield the current task to allow the scheduler to run
 void task_yield(void) {
-    tasks[current_task].state = READY;
+    tasks[current_task].state = READY; // Mark the current task as READY
     scheduler();
 }

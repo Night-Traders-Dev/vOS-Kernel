@@ -4,6 +4,7 @@
 const char *commands[] = {
     "clear - clears console",
     "ls - shows current directory",
+    "ps - shows running processes",
     "version - displays version number",
     "help - displays this menu",
     "exit - shutsdown vOS"
@@ -25,6 +26,8 @@ void handle_command(const char *buffer) {
             print_string(commands[i]);
             print_string("\n");
         }
+    } else if (strcmp(buffer, "ps") == 0) {
+        show_task_info();
     } else {
         print_string("Unrecognized command...\nTry typing help\n");
     }

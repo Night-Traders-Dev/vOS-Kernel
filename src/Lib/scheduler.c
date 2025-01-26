@@ -7,6 +7,30 @@ uint32_t current_task = 0;                      // Current task index
 task_t tasks[MAX_TASKS];                        // Task control blocks
 uint8_t task_stacks[MAX_TASKS][STACK_SIZE];     // Task stacks
 
+
+void show_task_info(void) {
+    for (int i = 0; i < task_count; i++) {
+        task_t *task = &tasks[i];
+
+        // Skip terminated tasks
+        if (task->state == TERMINATED) {
+            continue;
+        }
+
+        // Calculate stack usage
+        uintptr_t stack_usage = task->stack_base - task->stack_pointer;
+
+        // Print task info
+        uart_printf("Task #%d\n", i);
+        uart_printf("  State: %s\n", (task->state == RUNNING) ? "RUNNING" :
+                                (task->state == READY) ? "READY" :
+                                (task->state == BLOCKED) ? "BLOCKED" : "TERMINATED");
+        uart_printf("  Priority: %d\n", task->priority);
+        uart_printf("  Stack Usage: %lu bytes\n", stack_usage);
+        uart_printf("\n");
+    }
+}
+
 // Idle task definition
 void idle_task(void) {
     while (1) {

@@ -3,8 +3,10 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include "vstring.h"
 #include "timer.h"
+#include "uart.h"
 
 // Maximum number of tasks
 #define MAX_TASKS 5
@@ -31,7 +33,6 @@ typedef struct {
     task_state_t state;      // Current state of the task
 } task_t;
 
-// Global variables (declared as extern to avoid multiple definitions)
 extern int idle_task_idx;                       // Index of the idle task
 extern uint32_t task_count;                     // Number of created tasks
 extern uint32_t current_task;                   // Index of the currently running task
@@ -47,5 +48,6 @@ extern task_t* scheduler_get_current_task(void);                       // Get th
 extern void scheduler_set_current_task(task_t* task);                  // Set the current task
 extern void execute_task_immediately(task_entry_t task_function);      // Execute a task immediately
 extern void (*shell_task_entry)(void);
+extern void show_task_info(void);
 
 #endif // SCHEDULER_H

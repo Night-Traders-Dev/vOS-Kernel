@@ -12,7 +12,7 @@ BOOTLOADER = asm
 BOOT_SRC = $(BOOT_DIR)/boot.S
 OBJS = $(LIB_DIR)/kernel.o $(LIB_DIR)/command_handler.o $(LIB_DIR)/fs.o \
        $(LIB_DIR)/vstring.o $(LIB_DIR)/scheduler.o $(LIB_DIR)/timer.o \
-       $(BOOT_DIR)/boot.o
+       $(BOOT_DIR)/boot.o $(LIB_DIR)/uart.o
 
 all: clean build run
 

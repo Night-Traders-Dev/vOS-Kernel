@@ -10,6 +10,7 @@
 #include "timer.h"
 #include "uart.h"
 #include "watch.h"
+#include "heartbeat.h"
 
 // QEMU Shutdown Port
 #define QEMU_SHUTDOWN_PORT 0x84000008

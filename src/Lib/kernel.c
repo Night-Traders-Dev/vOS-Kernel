@@ -1,11 +1,19 @@
 #include "kernel.h"
 
+void timer_ISR(void) {
+    timer_interrupt_handler();
+}
+
 // Kernel tasks
 void shell_task(void) {
     char buffer[128];
     const uint32_t timeout_ticks = 50000;
-
+    init_heartbeat();
+//    setup_timer_1ms(timer_ISR);
     while (1) {
+//        if (check_heartbeat()) {
+//            print_string("1-second heartbeat triggered!\n");/
+//        }
         print_string("$ ");
         uart_read_string(buffer, sizeof(buffer), timeout_ticks);
 
@@ -17,7 +25,9 @@ void shell_task(void) {
     }
 }
 
-
+void hello(void) {
+    print_string("hello\n");
+}
 // Kernel entry point
 void kernel_entry(void) {
     static bool kernel_initialized = false;
@@ -60,7 +70,8 @@ void kernel_entry(void) {
     task_create(uart_task, 2);
     int shell_task_idx = task_create(shell_task, 1);
     void (*shell_task_entry)(void) = shell_task;
-     execute_task_immediately(shell_task_entry);
+    create_timer(5, hello);
+    execute_task_immediately(shell_task_entry);
 }
 
 

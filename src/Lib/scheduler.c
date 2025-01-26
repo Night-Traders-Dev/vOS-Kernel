@@ -85,19 +85,15 @@ void execute_task_immediately(void (*task_function)(void)) {
     task_t* current_task_ptr = scheduler_get_current_task();
 
     // Execute the task function immediately
-    print_string("[scheduler] Executing high-priority task immediately...\n");
     task_function();
 
     // Restore the original task
     scheduler_set_current_task(current_task_ptr);
-
-    print_string("[scheduler] High-priority task execution complete.\n");
 }
 
 // Create a new task
 int task_create(void (*task_entry)(void), uint8_t priority) {
     if (task_count >= MAX_TASKS) {
-        print_string("[kernel] Error: Maximum task limit reached.\n");
         return -1; // Indicate failure
     }
 
@@ -148,13 +144,6 @@ int task_create(void (*task_entry)(void), uint8_t priority) {
 
     // Ensure the stack pointer is 16-byte aligned as per the AArch64 ABI
     task->stack_pointer &= ~0xF;
-
-    print_string("[kernel] Task created with ID: ");
-    print_int(task_id);
-    print_string(", Priority: ");
-    print_int(priority);
-    print_string(".\n");
-
     return task_id; // Return the task ID as a success indicator
 }
 
@@ -175,7 +164,6 @@ void scheduler(void) {
     // Fall back to the idle task if no READY tasks are found
     if (next_task_idx == -1) {
         if (idle_task_idx == -1) {
-            print_string("[kernel] Creating idle task.\n");
             idle_task_idx = task_create(idle_task, 0);
         }
         next_task_idx = idle_task_idx;
@@ -188,19 +176,10 @@ void scheduler(void) {
     if (prev_task_idx != current_task) {
         tasks[prev_task_idx].state = READY; // Set the previous task to READY
         tasks[current_task].state = RUNNING; // Set the next task to RUNNING
-
-        print_string("[kernel] Switching context from task ");
-        print_int(prev_task_idx);
-        print_string(" to task ");
-        print_int(current_task);
-        print_string(".\n");
-
         // Perform context switch
         context_switch(&tasks[prev_task_idx], &tasks[current_task]);
     } else {
-        print_string("[kernel] No task switch needed. Continuing task ");
-        print_int(current_task);
-        print_string(".\n");
+        return;
     }
 }
 

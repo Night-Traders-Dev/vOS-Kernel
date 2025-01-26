@@ -53,19 +53,16 @@ void kernel_entry(void) {
     }
 
     print_string("[kernel] Kernel initialized...starting Task and Timer\n");
-    print_string("\033[2J\033[H"); // Clear screen and reset cursor
+    print_string("\033[2J\033[H");
     print_string("Welcome to vOS\n\n");
 
     kernel_initialized = true;
-
+    int shell_task_idx = task_create(shell_task, 1);
     task_create(uart_task, 2);
-//    init_scheduler();
+    init_scheduler();
 
-    // Create the shell task
-    int shell_task_idx = task_create(shell_task, 1); // Priority 1 for example
     void (*shell_task_entry)(void) = shell_task;
     execute_task_immediately(shell_task_entry);
-
 
 }
 
@@ -74,22 +71,16 @@ void kernel_entry(void) {
 void system_off(void) {
     print_string("[kernel] vOS Kernel Shutdown...\n");
 
-    // Platform-specific shutdown
     #if defined(TARGET_PICO) || defined(TARGET_PICO_2)
-        // Set GPIO pin 15 (3V3_EN) to low to power down the board
         gpio_init(15);
         gpio_set_dir(15, GPIO_OUT);
         gpio_put(15, 0);
 
-        // Optionally, add a delay to ensure the power-down process completes
         sleep_ms(100);
 
-        // Enter an infinite loop to halt the processor
         while (1) {
-            // The processor is halted; no further code will execute
         }
     #else
-        // Fallback for QEMU and other platforms
         register const uint64_t function_id asm("x0") = QEMU_SHUTDOWN_PORT;
         asm volatile("hvc #0" :: "r"(function_id));
     #endif

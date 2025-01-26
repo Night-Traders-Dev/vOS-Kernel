@@ -7,7 +7,6 @@
 #include "vstring.h"
 #include "fs.h"
 #include "scheduler.h"
-#include "timer.h"
 #include "uart.h"
 #include "watch.h"
 #include "heartbeat.h"

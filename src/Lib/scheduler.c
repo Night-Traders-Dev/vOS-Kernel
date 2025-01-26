@@ -200,7 +200,6 @@ void context_switch(task_t *prev_task, task_t *next_task) {
 
 
 void task_yield(void) {
-    Timer_Handler();
     print_string("[scheduler] Task yielding execution...\n");
     tasks[current_task].state = READY;
     scheduler();

@@ -55,7 +55,7 @@ void handle_uart_input(char c) {
 
 // UART read character with timeout
 int uart_read_char_with_timeout(char *c, uint32_t timeout_ticks) {
-    uint32_t start_tick = system_ticks;
+    uint32_t start_tick = 0;
 
     while (1) {
         if (!(UART_FR & (1 << 4))) { // UART FIFO is not empty
@@ -63,9 +63,6 @@ int uart_read_char_with_timeout(char *c, uint32_t timeout_ticks) {
             return 0; // Character read successfully
         }
 
-        if (timeout_occurred(start_tick, timeout_ticks)) {
-            return -1; // Timeout occurred
-        }
     }
 }
 

@@ -14,22 +14,21 @@ void setup_timer_1ms(void (*timer_ISR)(void)) {
 }
 
 static void delay_cycles(uint32_t cycles) {
-    while (cycles--) {
-        __asm__ volatile ("nop"); // Perform no operation (burn CPU cycles)
-    }
+    uint32_t start, current;
+
+    // Read the cycle counter register at the start
+    __asm__ volatile ("mrs %0, cntvct_el0" : "=r" (start));
+
+    do {
+        // Read the current cycle counter value
+        __asm__ volatile ("mrs %0, cntvct_el0" : "=r" (current));
+    } while ((current - start) < cycles);
 }
 
-/**
- * @brief Interrupt handler to increment the tick count.
- * This is a placeholder to simulate a timer interrupt.
- */
 void timer_interrupt_handler(void) {
     tick_count++;
 }
 
-/**
- * @brief Initialize the heartbeat system.
- */
 void init_heartbeat(void) {
     tick_count = 0;
 }

@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include "vstring.h"
-#include "timer.h"
 #include "scheduler.h"
 
 extern char uart_read_char(void);

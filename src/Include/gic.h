@@ -3,11 +3,18 @@
 
 #include <stdint.h>
 
-// GICv3 Distributor base address
-#define GICD_BASE 0x2C000000  // QEMU's default address for GICv3 Distributor
+#define WRITE_REG(addr, value)    (*(volatile uint32_t *)(uintptr_t)(addr) = (value))
+#define READ_REG(addr)            (*(volatile uint32_t *)(uintptr_t)(addr))
 
-// GICv3 CPU Interface base address
-#define GICC_BASE 0x2C001000  // QEMU's default address for GICv3 CPU Interface
+#define WRITE_SYSREG(reg, value) asm volatile("msr " reg ", %0" : : "r" (value) : "memory")
+#define READ_SYSREG(reg, var) asm volatile("mrs %0, " reg : "=r" (var))
+
+
+// GICv3 Distributor base address
+#define GICD_BASE 0x08000000
+
+// GICv3 Redistributor base address
+#define GICR_BASE 0x080A0000
 
 // GICD Register Offsets
 #define GICD_CTLR         (GICD_BASE + 0x0000)  // GICD Control Register
@@ -16,16 +23,16 @@
 #define GICD_ITARGETSR    (GICD_BASE + 0x0800)  // GICD Interrupt Target
 #define GICD_IPRIORITYR   (GICD_BASE + 0x0400)  // GICD Interrupt Priority
 
-// GICC Register Offsets
-#define GICC_CTLR         (GICC_BASE + 0x0000)  // GICC Control Register
-#define GICC_PMR          (GICC_BASE + 0x0004)  // GICC Priority Mask Register
-#define GICC_BPR          (GICC_BASE + 0x0008)  // GICC Binary Point Register
+// GICv3 System Registers for CPU Interface
+#define ICC_CTLR_EL1      "S3_0_C12_C12_4"  // CPU Interface Control Register
+#define ICC_PMR_EL1       "S3_0_C4_C6_0"    // Priority Mask Register
+#define ICC_IAR1_EL1      "S3_0_C12_C12_0"  // Interrupt Acknowledge Register
+#define ICC_EOIR1_EL1     "S3_0_C12_C12_1"  // End of Interrupt Register
+#define ICC_IGRPEN1_EL1   "S3_0_C12_C12_7"  // Group 1 Interrupt Enable Register
+#define ICC_SRE_EL1       "S3_0_C12_C12_5"  // System Register Enable
 
 // GICD Control Register Value
 #define GICD_CTLR_ENABLE  (1U << 0)  // Enable the distributor
-
-// GICC Control Register Value
-#define GICC_CTLR_ENABLE  (1U << 0)  // Enable the CPU interface
 
 // Priority values for GIC
 #define GICC_PMR_PRIO_LOW (0xFF)  // Lowest priority value

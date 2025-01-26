@@ -1,23 +1,21 @@
 #include "gic.h"
 
-#define WRITE_REG(addr, value)    (*(volatile uint32_t *)(uintptr_t)(addr) = (value))
-#define READ_REG(addr)            (*(volatile uint32_t *)(uintptr_t)(addr))
-
 // Function to initialize the GICv3 system
 void gic_init(void) {
     // Initialize Distributor
     WRITE_REG(GICD_CTLR, GICD_CTLR_ENABLE);
 
-    // Initialize CPU Interface
-    WRITE_REG(GICC_CTLR, GICC_CTLR_ENABLE);
+    // Enable System Register Interface for GICv3
+    WRITE_SYSREG(ICC_SRE_EL1, 0x7);  // Enable EL1 system registers for GIC
+
+    // Enable the CPU interface
+//    WRITE_SYSREG(ICC_IGRPEN1_EL1, 1);
+    WRITE_SYSREG("ICC_PMR_EL1", GICC_PMR_PRIO_LOW);
 
     // Set the priority mask to the lowest priority (all interrupts are enabled)
-    WRITE_REG(GICC_PMR, GICC_PMR_PRIO_LOW);
-
-    // Set the binary point register to no group (round-robin)
-    WRITE_REG(GICC_BPR, 0);
-
-    // Additional setup such as enabling specific interrupts can go here...
+//    WRITE_SYSREG(ICC_PMR_EL1, GICC_PMR_PRIO_LOW);
+    WRITE_SYSREG("ICC_IGRPEN1_EL1", 1);
+    // Additional setup, such as enabling specific interrupts, can go here...
 }
 
 // Function to enable a specific interrupt

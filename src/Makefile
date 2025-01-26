@@ -51,7 +51,7 @@ run:
 	@echo "vOS built using $(BOOT_SRC)..."
 	@echo "Running QEMU..." | tee -a dmesg
 	@date "+[%Y-%m-%d %H:%M:%S] Running QEMU..." >> dmesg
-	qemu-system-aarch64 -M virt -cpu cortex-a53 -nographic -serial mon:stdio -kernel $(BUILD_DIR)/boot.elf
+	qemu-system-aarch64 -M virt,gic-version=3 -cpu cortex-a53 -nographic -serial mon:stdio -kernel $(BUILD_DIR)/boot.elf
 
 debug:
 	@echo "Running QEMU in debug mode. Connect gdb..." | tee -a dmesg

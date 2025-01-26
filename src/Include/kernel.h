@@ -15,6 +15,6 @@
 #define SHELL_TASK_PRIORITY 100
 
 // Function prototypes
-void kernel_entry(void);
+extern void kernel_entry(void);
 extern void system_off(void);
 #endif // KERNEL_H

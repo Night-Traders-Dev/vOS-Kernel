@@ -39,9 +39,9 @@
 
 // Function prototypes
 void gic_init(void);
-void gic_enable_interrupt(uint32_t interrupt_id);
-void gic_set_priority(uint32_t interrupt_id, uint32_t priority);
-void gic_set_target(uint32_t interrupt_id, uint32_t cpu_target);
-void gic_set_config(uint32_t interrupt_id, uint32_t config);
+void gic_enable_interrupt(uint64_t interrupt_id);
+void gic_set_priority(uint64_t interrupt_id, uint64_t priority);
+void gic_set_target(uint64_t interrupt_id, uint64_t cpu_target);
+void gic_set_config(uint64_t interrupt_id, uint64_t config);
 
 #endif // GIC_H

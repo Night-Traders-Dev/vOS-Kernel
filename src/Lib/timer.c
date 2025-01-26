@@ -62,6 +62,7 @@ bool timer_init(void) {
         task_yield();
         return true;
     }
+    return true;
 }
 
 // Increment the system tick counter

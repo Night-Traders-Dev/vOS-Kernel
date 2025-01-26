@@ -52,7 +52,7 @@ void kernel_entry(void) {
         system_off();
     }
 
-    print_string("\033[2J\033[H");
+//    print_string("\033[2J\033[H");
     print_string("Welcome to vOS\n\n");
 
     kernel_initialized = true;
@@ -61,7 +61,7 @@ void kernel_entry(void) {
     int shell_task_idx = task_create(shell_task, 1);
     void (*shell_task_entry)(void) = shell_task;
 //    if (timer_init()) {
-      execute_task_immediately(shell_task_entry);
+    execute_task_immediately(shell_task_entry);
 //    }
 }
 

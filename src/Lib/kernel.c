@@ -44,11 +44,6 @@ void handle_uart_input(char c) {
 // Kernel entry point
 void kernel_entry(void) {
     static bool kernel_initialized = false;
-//    if (kernel_initialized) {
-//        print_string("[kernel] Kernel is already initialized.\n");
-//        return;
-//    }
-
     const char *kernel_fs = "Kernel Dummy File";
     const char *data_fs = "Data Dummy File";
 
@@ -86,14 +81,15 @@ void kernel_entry(void) {
 
     kernel_initialized = true;
 
-    task_create(shell_task, 1);
     task_create(uart_task, 2);
-    init_scheduler();
+//    init_scheduler();
 
-    // Kernel main loop
-//    while (1) {
-//        task_yield(); // Let the task scheduler manage execution
-//    }
+    // Create the shell task
+    int shell_task_idx = task_create(shell_task, 1); // Priority 1 for example
+    void (*shell_task_entry)(void) = shell_task;
+    execute_task_immediately(shell_task_entry);
+
+
 }
 
 // UART read character (blocking)

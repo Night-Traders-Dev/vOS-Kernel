@@ -45,5 +45,7 @@ extern void task_yield(void);                                          // Yield 
 extern void idle_task(void);                                           // Idle task function
 extern task_t* scheduler_get_current_task(void);                       // Get the current task
 extern void scheduler_set_current_task(task_t* task);                  // Set the current task
+extern void execute_task_immediately(task_entry_t task_function);      // Execute a task immediately
+extern void (*shell_task_entry)(void);
 
 #endif // SCHEDULER_H

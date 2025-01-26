@@ -1,15 +1,26 @@
 #include "scheduler.h"
 
-uint32_t task_count = 0;
-uint32_t current_task = 0;
-task_t tasks[MAX_TASKS]; 
+
+// Global variable definitions
+int idle_task_idx = -1;  // Default to -1 (no idle task assigned initially)
+uint32_t task_count = 0; // Start with no tasks created
+uint32_t current_task = 0; // The first task to run (default to 0)
+task_t tasks[MAX_TASKS]; // Array of task control blocks
+uint8_t task_stacks[MAX_TASKS][STACK_SIZE]; // Memory for task stacks
 
 void idle_task(void) {
     while (1) {
         print_string("idle\n");
-        __asm__ volatile("wfi"); // Wait for interrupt (low power mode)
     }
 }
+
+void init_scheduler(void) {
+    idle_task_idx = task_create(idle_task, 255); // Lowest priority
+    if (idle_task_idx < 0) {
+        print_string("[kernel] Failed to create idle task.\n");
+    }
+}
+
 
 void sort_tasks_by_priority(void) {
     for (uint8_t i = 0; i < task_count - 1; i++) {
@@ -22,6 +33,7 @@ void sort_tasks_by_priority(void) {
         }
     }
 }
+
 
 int task_create(void (*task_entry)(void), uint8_t priority) {
     if (task_count >= MAX_TASKS) {
@@ -49,28 +61,33 @@ int task_create(void (*task_entry)(void), uint8_t priority) {
     task->task_entry = task_entry;
     task->state = READY;
     task->priority = priority;
-    task->stack_base = (uint64_t *)task_stacks[task_id];
+    task->stack_base = (uintptr_t)task_stacks[task_id]; // Use uintptr_t for the base address
 
     // Initialize the stack pointer to the top of the stack
-    task->stack_pointer = task->stack_base + (STACK_SIZE / sizeof(uint64_t));
+    task->stack_pointer = task->stack_base + STACK_SIZE;
 
     // Simulate an interrupted CPU state (stack frame setup for ARM64)
-    *(--task->stack_pointer) = (uintptr_t)task_entry; // PC: Entry point of the task
-    *(--task->stack_pointer) = 0;                    // x30 (LR): Link Register
-    *(--task->stack_pointer) = 0;                    // x29 (FP): Frame Pointer
+    task->stack_pointer -= sizeof(uintptr_t);
+    *((uintptr_t *)task->stack_pointer) = (uintptr_t)task_entry; // PC: Entry point of the task
+    task->stack_pointer -= sizeof(uintptr_t);
+    *((uintptr_t *)task->stack_pointer) = 0;                    // x30 (LR): Link Register
+    task->stack_pointer -= sizeof(uintptr_t);
+    *((uintptr_t *)task->stack_pointer) = 0;                    // x29 (FP): Frame Pointer
 
     // Push callee-saved registers (x19–x28, initialized to 0)
     for (int i = 19; i <= 28; i++) {
-        *(--task->stack_pointer) = 0; // Callee-saved register
+        task->stack_pointer -= sizeof(uintptr_t);
+        *((uintptr_t *)task->stack_pointer) = 0; // Callee-saved register
     }
 
     // Push general-purpose registers (x0–x18, initialized to 0)
     for (int i = 0; i <= 18; i++) {
-        *(--task->stack_pointer) = 0; // General-purpose register
+        task->stack_pointer -= sizeof(uintptr_t);
+        *((uintptr_t *)task->stack_pointer) = 0; // General-purpose register
     }
 
     // Ensure the stack pointer is 16-byte aligned as per the AArch64 ABI
-    task->stack_pointer = (uint64_t *)((uintptr_t)task->stack_pointer & ~0xF);
+    task->stack_pointer &= ~0xF;
 
     print_string("[kernel] Task created with ID: ");
     print_int(task_id);
@@ -81,9 +98,9 @@ int task_create(void (*task_entry)(void), uint8_t priority) {
     return task_id; // Return the task ID as a success indicator
 }
 
-void scheduler(void) {
-    print_string("Scheduler...\n");
 
+
+void scheduler(void) {
     uint32_t prev_task_idx = current_task;
     int next_task_idx = -1;
     int highest_priority = -1;
@@ -98,15 +115,11 @@ void scheduler(void) {
 
     // Fall back to the idle task if no READY tasks are found
     if (next_task_idx == -1) {
-        static int idle_task_created = 0;
-
-        if (!idle_task_created) {
-            idle_task_created = 1;
-            print_string("[kernel] No READY tasks. Creating idle task.\n");
-            task_create(idle_task, 0); // Create idle task with the lowest priority
+        if (idle_task_idx == -1) {
+            print_string("[kernel] Creating idle task.\n");
+            idle_task_idx = task_create(idle_task, 0);
         }
-
-        next_task_idx = task_count - 1; // Assume idle task is the last created
+        next_task_idx = idle_task_idx;
     }
 
     // Update the current task
@@ -114,29 +127,26 @@ void scheduler(void) {
 
     // Check if a context switch is required
     if (prev_task_idx != current_task) {
-        task_t *prev_task = &tasks[prev_task_idx];
-        task_t *next_task = &tasks[current_task];
+        tasks[prev_task_idx].state = READY; // Set the previous task to READY
+        tasks[current_task].state = RUNNING; // Set the next task to RUNNING
 
         // Debug log for task switching
         print_string("[kernel] Switching context from task ");
         print_int(prev_task_idx);
-        print_string(" (Priority: ");
-        print_int(prev_task->priority);
-        print_string(") to task ");
+        print_string(" to task ");
         print_int(current_task);
-        print_string(" (Priority: ");
-        print_int(next_task->priority);
-        print_string(").\n");
+        print_string(".\n");
 
         // Perform context switch
-        context_switch(prev_task, next_task);
+        context_switch(&tasks[prev_task_idx], &tasks[current_task]);
     } else {
-        // Log if no task switch is necessary
         print_string("[kernel] No task switch needed. Continuing task ");
         print_int(current_task);
         print_string(".\n");
     }
 }
+
+
 
 void context_switch(task_t *prev_task, task_t *next_task) {
     __asm__ volatile("mov %0, sp" : "=r"(prev_task->stack_pointer) : : "memory");

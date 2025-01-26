@@ -17,13 +17,37 @@ void shell_task(void) {
     }
 }
 
+void uart_task(void) {
+    char c;
+    while (1) {
+        if (!(UART_FR & (1 << 4))) { // FIFO not empty
+            c = (char)UART_DR;
+            handle_uart_input(c); // Handle the character input from UART
+        }
+        task_yield();
+    }
+}
+
+// UART input handler
+void handle_uart_input(char c) {
+    // For now, simply echo the character back to the UART
+    if (c == '\n') {
+        print_string("\n[UART Input]: New Line\n");
+    } else if (c == '\r') {
+        print_string("[UART Input]: Carriage Return\n");
+    } else {
+        print_string("[UART Input]: ");
+        UART_DR = c;  // Echo the character back to UART
+    }
+}
+
 // Kernel entry point
 void kernel_entry(void) {
     static bool kernel_initialized = false;
-    if (kernel_initialized) {
-        print_string("[kernel] Kernel is already initialized.\n");
-        task_yield();
-    }
+//    if (kernel_initialized) {
+//        print_string("[kernel] Kernel is already initialized.\n");
+//        return;
+//    }
 
     const char *kernel_fs = "Kernel Dummy File";
     const char *data_fs = "Data Dummy File";
@@ -62,14 +86,14 @@ void kernel_entry(void) {
 
     kernel_initialized = true;
 
-    init_scheduler();
     task_create(shell_task, 1);
-//    task_yield();
+    task_create(uart_task, 2);
+    init_scheduler();
 
     // Kernel main loop
-    while (1) {
-        task_yield(); // Let the task scheduler manage execution
-    }
+//    while (1) {
+//        task_yield(); // Let the task scheduler manage execution
+//    }
 }
 
 // UART read character (blocking)

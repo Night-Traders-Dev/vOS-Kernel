@@ -16,5 +16,6 @@
 void kernel_entry(void);
 extern char uart_read_char(void);
 extern void uart_read_string(char *buffer, int max_length, uint32_t timeout_ticks);
+extern void handle_uart_input(char c);
 extern void system_off(void);
 #endif // KERNEL_H

@@ -3,7 +3,7 @@
 // Kernel tasks
 void shell_task(void) {
     char buffer[128];
-    const uint32_t timeout_ticks = 5000;
+    const uint32_t timeout_ticks = 50000;
 
     while (1) {
         print_string("$ ");
@@ -57,13 +57,12 @@ void kernel_entry(void) {
     print_string("Welcome to vOS\n\n");
 
     kernel_initialized = true;
-    int shell_task_idx = task_create(shell_task, 1);
-    task_create(uart_task, 2);
     init_scheduler();
-    if (timer_init()) {
-        void (*shell_task_entry)(void) = shell_task;
-        execute_task_immediately(shell_task_entry);
-    }
+    task_create(uart_task, 2);
+    int shell_task_idx = task_create(shell_task, 1);
+    void (*shell_task_entry)(void) = shell_task;
+//    timer_init();
+    execute_task_immediately(shell_task_entry);
 }
 
 

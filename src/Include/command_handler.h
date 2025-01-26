@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "vstring.h"
+#include "kernel.h"
 
 void handle_command(const char *buffer);
 #endif

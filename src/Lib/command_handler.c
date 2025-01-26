@@ -11,7 +11,7 @@ const char *commands[] = {
 
 void handle_command(const char *buffer) {
     if (strcmp(buffer, "exit") == 0) {
-        return;
+        system_off();
     } else if (strcmp(buffer, "clear") == 0) {
         print_string("\033[2J\033[H");
     } else if (strcmp(buffer, "version") == 0) {

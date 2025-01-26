@@ -63,12 +63,13 @@ void kernel_entry(void) {
     kernel_initialized = true;
 
     // Start the shell task
-    task_create(shell_task, 5); // Example task with priority 5
+    task_create(shell_task, 5);
+    task_create(idle_task, 1);
 
     // Kernel main loop
-    while (1) {
-        task_yield(); // Let the task scheduler manage execution
-    }
+//    while (1) {
+//        task_yield(); // Let the task scheduler manage execution
+//    }
 }
 
 // UART read character (blocking)

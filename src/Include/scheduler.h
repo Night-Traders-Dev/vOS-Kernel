@@ -38,7 +38,7 @@ int task_create(void (*task_entry)(void), uint8_t priority);  // Create a new ta
 void scheduler(void);                                          // Task scheduler function
 void context_switch(task_t *prev_task, task_t *next_task);     // Perform a context switch
 void task_yield(void);                                         // Yield control to the scheduler
-static void idle_task(void);                                   // Idle task function
+extern void idle_task(void);                                   // Idle task function
 
 // Task stacks and task array
 static uint8_t task_stacks[MAX_TASKS][STACK_SIZE];             // Memory for task stacks

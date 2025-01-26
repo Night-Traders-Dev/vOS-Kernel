@@ -4,7 +4,7 @@ uint32_t task_count = 0;
 uint32_t current_task = 0;
 task_t tasks[MAX_TASKS]; 
 
-static void idle_task(void) {
+void idle_task(void) {
     while (1) {
         print_string("idle\n");
         __asm__ volatile("wfi"); // Wait for interrupt (low power mode)
@@ -30,6 +30,7 @@ int task_create(void (*task_entry)(void), uint8_t priority) {
     }
 
     int task_id = -1;
+
     // Find an available task slot
     for (int i = 0; i < MAX_TASKS; i++) {
         if (tasks[i].state == TERMINATED) {
@@ -48,19 +49,28 @@ int task_create(void (*task_entry)(void), uint8_t priority) {
     task->task_entry = task_entry;
     task->state = READY;
     task->priority = priority;
-    task->stack_base = (uint32_t *)task_stacks[task_id];
+    task->stack_base = (uint64_t *)task_stacks[task_id];
 
-    task->stack_pointer = task->stack_base + (STACK_SIZE / sizeof(uint32_t));
-    *(--task->stack_pointer) = (uintptr_t)task_entry; // Task entry point
-    *(--task->stack_pointer) = 0; // Return address (e.g., to context_switch or idle task)
+    // Initialize the stack pointer to the top of the stack
+    task->stack_pointer = task->stack_base + (STACK_SIZE / sizeof(uint64_t));
 
-    // Initialize all registers (use CONTEXT_SAVE_SIZE for the number of registers to be saved)
-    for (int i = 0; i < CONTEXT_SAVE_SIZE; i++) {
-        *(--task->stack_pointer) = 0; // Initialize registers to zero
+    // Simulate an interrupted CPU state (stack frame setup for ARM64)
+    *(--task->stack_pointer) = (uintptr_t)task_entry; // PC: Entry point of the task
+    *(--task->stack_pointer) = 0;                    // x30 (LR): Link Register
+    *(--task->stack_pointer) = 0;                    // x29 (FP): Frame Pointer
+
+    // Push callee-saved registers (x19–x28, initialized to 0)
+    for (int i = 19; i <= 28; i++) {
+        *(--task->stack_pointer) = 0; // Callee-saved register
     }
 
-    // Ensure the stack pointer is properly aligned
-    task->stack_pointer = (uint32_t *)((uintptr_t)task->stack_pointer & ~0x7);
+    // Push general-purpose registers (x0–x18, initialized to 0)
+    for (int i = 0; i <= 18; i++) {
+        *(--task->stack_pointer) = 0; // General-purpose register
+    }
+
+    // Ensure the stack pointer is 16-byte aligned as per the AArch64 ABI
+    task->stack_pointer = (uint64_t *)((uintptr_t)task->stack_pointer & ~0xF);
 
     print_string("[kernel] Task created with ID: ");
     print_int(task_id);
@@ -68,7 +78,7 @@ int task_create(void (*task_entry)(void), uint8_t priority) {
     print_int(priority);
     print_string(".\n");
 
-    return 0; // Indicate success
+    return task_id; // Return the task ID as a success indicator
 }
 
 void scheduler(void) {
@@ -128,14 +138,21 @@ void scheduler(void) {
     }
 }
 
-// Perform a context switch between two tasks
 void context_switch(task_t *prev_task, task_t *next_task) {
     __asm__ volatile("mov %0, sp" : "=r"(prev_task->stack_pointer) : : "memory");
     __asm__ volatile("mov sp, %0" :: "r"(next_task->stack_pointer) : "memory");
-
-    // Jump to the task entry point
-    ((void (*)(void))((uintptr_t)next_task->stack_pointer[-1]))();
+    __asm__ volatile(
+        "ldp x19, x20, [sp], #16\n" // Restore x19, x20
+        "ldp x21, x22, [sp], #16\n" // Restore x21, x22
+        "ldp x23, x24, [sp], #16\n" // Restore x23, x24
+        "ldp x25, x26, [sp], #16\n" // Restore x25, x26
+        "ldp x27, x28, [sp], #16\n" // Restore x27, x28
+        "ldp x29, x30, [sp], #16\n" // Restore x29 (FP) and x30 (LR)
+        "ldr x0, [sp], #8\n"        // Restore x0 (argument register)
+        "br x0\n"                   // Branch to the task entry point
+    );
 }
+
 
 void task_yield(void) {
     print_string("[scheduler] Task yielding execution...\n");

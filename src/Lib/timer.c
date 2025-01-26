@@ -1,6 +1,4 @@
 #include "timer.h"
-#include "scheduler.h"
-#include "kernel.h"
 
 uint32_t system_ticks = 0;
 uint32_t SystemCoreClock = 0;
@@ -9,13 +7,14 @@ bool scheduler_initialized(void) {
     return (task_count > 0);  // Check if tasks are initialized
 }
 
-void timer_init(void) {
+bool timer_init(void) {
+    // Register the timer interrupt with the GIC once, before timer configuration
+    gic_register_timer_interrupt();
+    // Ensure the system clock is initialized
     if (SystemCoreClock == 0) {
         print_string("Error: SystemCoreClock not initialized. Setting default value.\n");
         SystemCoreClock = 16000000;  // Default to 16 MHz
     }
-
-    print_string("Timer Starting\n");
 
     char buffer[32];
     int_to_string(SystemCoreClock, buffer);
@@ -31,8 +30,8 @@ void timer_init(void) {
     print_string("Clearing TIMER_VAL\n");
 
     // Enable the custom timer and configure for periodic mode with interrupt
-    TIMER_CTRL = TIMER_CTRL_ENABLE_Msk | 
-                 TIMER_CTRL_MODE_Msk | 
+    TIMER_CTRL = TIMER_CTRL_ENABLE_Msk |
+                 TIMER_CTRL_MODE_Msk |
                  TIMER_CTRL_INTEN_Msk;
 
     print_string("Enabling TIMER_CTRL\n");
@@ -40,12 +39,12 @@ void timer_init(void) {
     // Verify if the timer is enabled
     if ((TIMER_CTRL & TIMER_CTRL_ENABLE_Msk) == 0) {
         print_string("Error: Failed to enable timer.\n");
-        return;
+        return false;
     }
 
     if (TIMER_LOAD == 0) {
         print_string("Error: TIMER_LOAD value is 0. Timer cannot function.\n");
-        return;
+        return false;
     }
 
     print_string("Custom Timer Configured Successfully\n");
@@ -58,15 +57,26 @@ void timer_init(void) {
         }
     }
 
-    print_string("Returning\n");
-
-    // Start the scheduler
-    scheduler();
+    if (TIMER_CTRL & TIMER_CTRL_ENABLE_Msk) {
+        return true;  // Timer initialized successfully
+    } else {
+        return false;  // Timer initialization failed
+    }
 }
+
 
 // Increment system ticks
 void increment_system_ticks(void) {
     system_ticks++;
+}
+
+// GIC-specific registration for the timer interrupt
+void gic_register_timer_interrupt(void) {
+    // Timer interrupt is assumed to be interrupt ID 30
+    gic_enable_interrupt(30);            // Enable the interrupt in the GIC
+    gic_set_priority(30, 0x20);          // Set priority for the timer interrupt (optional)
+    gic_set_target(30, 0x01);            // Set target CPU (assuming single-core)
+    gic_set_config(30, 2);               // Set the interrupt to edge-triggered (optional)
 }
 
 // Timer interrupt handler

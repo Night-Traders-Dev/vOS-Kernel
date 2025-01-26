@@ -4,7 +4,7 @@
 int idle_task_idx = -1;                         // Default to -1 (no idle task initially)
 uint32_t task_count = 0;                        // Start with no tasks created
 uint32_t current_task = 0;                      // Current task index
-task_t tasks[MAX_TASKS];                        // Task control blocks
+task_t tasks[MAX_TASKS] = {0};                        // Task control blocks
 uint8_t task_stacks[MAX_TASKS][STACK_SIZE];     // Task stacks
 
 

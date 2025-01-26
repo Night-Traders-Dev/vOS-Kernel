@@ -18,9 +18,16 @@ void uart_puts(const char *str) {
 }
 
 void uart_putc(char c) {
-    while (UART_FR & (1 << 5));
+    uint32_t timeout = 1000000; // Timeout threshold
+    while (UART_FR & (1 << 5)) {
+        if (--timeout == 0) {
+            uart_puts("[UART Timeout]\n");  // Optional error handling
+            return;
+        }
+    }
     UART_DR = c;
 }
+
 
 // UART read character (blocking)
 char uart_read_char(void) {

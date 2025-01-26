@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "scheduler.h"
+#include "kernel.h"
+#include "gic.h"
 
 // Define timer-specific constants
 #define TIMER_BASE 0x40000000  // Example base address for the custom timer
@@ -24,10 +27,13 @@
 #define TIMER_SET_MODE_ONESHOT()   (TIMER_CTRL &= ~TIMER_CTRL_MODE_Msk)  // Set timer to one-shot mode
 
 // Function prototypes
-void timer_init(void);                          // Initialize the custom timer
+bool timer_init(void);                          // Initialize the custom timer
 void increment_system_ticks(void);              // Increment the global system tick counter
 bool timeout_occurred(uint32_t start_tick, uint32_t timeout_ticks);  // Check for timeout
 __attribute__((weak)) void Timer_Handler(void); // Custom timer interrupt handler (weak for override)
+
+// GIC-specific setup for the timer interrupt
+void gic_register_timer_interrupt(void);       // Register timer interrupt in GIC
 
 // Macro for error checking
 #define IS_CLOCK_INITIALIZED() (SystemCoreClock != 0)  // Check if SystemCoreClock is initialized

@@ -9,7 +9,7 @@
 #include "uart.h"
 
 // Maximum number of tasks
-#define MAX_TASKS 5
+#define MAX_TASKS 32
 #define STACK_SIZE 0x200 // Size of each task stack in bytes
 #define NUM_GP_REGISTERS 18 // Number of general-purpose registers saved during a context switch
 

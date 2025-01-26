@@ -9,6 +9,7 @@
 #include "scheduler.h"
 #include "timer.h"
 #include "uart.h"
+#include "watch.h"
 
 // QEMU Shutdown Port
 #define QEMU_SHUTDOWN_PORT 0x84000008

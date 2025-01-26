@@ -63,12 +63,12 @@ void increment_system_ticks(void) {
 }
 
 void gic_register_timer_interrupt(void) {
-    gic_init();
-    uint32_t timer_interrupt_id = 30;  // Timer interrupt ID (verify with GIC configuration)
+    uint64_t timer_interrupt_id = 30;  // Timer interrupt ID (verify with GIC configuration)
     gic_enable_interrupt(timer_interrupt_id);
     gic_set_priority(timer_interrupt_id, 0x20);  // Example priority
     gic_set_target(timer_interrupt_id, 0x01);  // Target CPU 0 (for single-core)
     gic_set_config(timer_interrupt_id, 0x2);  // 0x2 means edge-triggered
+    gic_init();
     print_string("Timer interrupt registered and configured.\n");
 }
 

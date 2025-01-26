@@ -32,6 +32,7 @@ Welcome to the vOS Kernel! This project is a simple ARM64 microkernel designed f
 * Interrupt Handling: Supports basic synchronous exceptions and IRQ handling.
 * Minimal Design: Focused on being a simple and educational microkernel.
 * Formatted Output: Custom implementation of vprint for formatted string output via UART.
+* Scheduler: A simple task scheduler with task management and memory tracking functionality.
 
 # Getting Started
 

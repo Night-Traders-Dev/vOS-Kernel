@@ -2,11 +2,24 @@
 
 uint32_t task_count = 0;
 uint32_t current_task = 0;
+task_t tasks[MAX_TASKS]; 
 
 static void idle_task(void) {
     while (1) {
         print_string("idle\n");
         __asm__ volatile("wfi"); // Wait for interrupt (low power mode)
+    }
+}
+
+void sort_tasks_by_priority(void) {
+    for (uint8_t i = 0; i < task_count - 1; i++) {
+        for (uint8_t j = i + 1; j < task_count; j++) {
+            if (tasks[i].priority > tasks[j].priority) {
+                task_t temp = tasks[i];
+                tasks[i] = tasks[j];
+                tasks[j] = temp;
+            }
+        }
     }
 }
 
@@ -17,6 +30,7 @@ int task_create(void (*task_entry)(void), uint8_t priority) {
     }
 
     int task_id = -1;
+    // Find an available task slot
     for (int i = 0; i < MAX_TASKS; i++) {
         if (tasks[i].state == TERMINATED) {
             task_id = i;
@@ -24,6 +38,7 @@ int task_create(void (*task_entry)(void), uint8_t priority) {
         }
     }
 
+    // If no terminated task slot, create a new task at the next available index
     if (task_id == -1) {
         task_id = task_count++;
     }
@@ -36,13 +51,15 @@ int task_create(void (*task_entry)(void), uint8_t priority) {
     task->stack_base = (uint32_t *)task_stacks[task_id];
 
     task->stack_pointer = task->stack_base + (STACK_SIZE / sizeof(uint32_t));
-    *(--task->stack_pointer) = (uintptr_t)task_entry;
-    *(--task->stack_pointer) = 0;
+    *(--task->stack_pointer) = (uintptr_t)task_entry; // Task entry point
+    *(--task->stack_pointer) = 0; // Return address (e.g., to context_switch or idle task)
 
+    // Initialize all registers (use CONTEXT_SAVE_SIZE for the number of registers to be saved)
     for (int i = 0; i < CONTEXT_SAVE_SIZE; i++) {
-        *(--task->stack_pointer) = 0;
+        *(--task->stack_pointer) = 0; // Initialize registers to zero
     }
 
+    // Ensure the stack pointer is properly aligned
     task->stack_pointer = (uint32_t *)((uintptr_t)task->stack_pointer & ~0x7);
 
     print_string("[kernel] Task created with ID: ");
@@ -54,10 +71,9 @@ int task_create(void (*task_entry)(void), uint8_t priority) {
     return 0; // Indicate success
 }
 
-
-// Scheduler to switch between tasks based on the time slice
 void scheduler(void) {
-    print_string("Scheduler...debug/n");
+    print_string("Scheduler...\n");
+
     uint32_t prev_task_idx = current_task;
     int next_task_idx = -1;
     int highest_priority = -1;
@@ -112,11 +128,12 @@ void scheduler(void) {
     }
 }
 
-
 // Perform a context switch between two tasks
 void context_switch(task_t *prev_task, task_t *next_task) {
     __asm__ volatile("mov %0, sp" : "=r"(prev_task->stack_pointer) : : "memory");
     __asm__ volatile("mov sp, %0" :: "r"(next_task->stack_pointer) : "memory");
+
+    // Jump to the task entry point
     ((void (*)(void))((uintptr_t)next_task->stack_pointer[-1]))();
 }
 

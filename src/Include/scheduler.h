@@ -28,19 +28,18 @@ typedef struct {
     int priority;             // Priority of the task (higher value = higher priority)
 } task_t;
 
+// Global variables
+extern uint32_t task_count;     // Number of created tasks
+extern uint32_t current_task;   // Index of the currently running task
+extern task_t tasks[MAX_TASKS]; // Array of task control blocks
+
 // Function prototypes
-int task_create(void (*task_entry)(void), uint8_t priority); // Create a new task
-void scheduler(void);                                       // Task scheduler function
-void context_switch(task_t *prev_task, task_t *next_task);  // Perform a context switch
-void task_yield(void);                                      // Yield control to the scheduler
-static void idle_task(void);                                // Idle task function
+int task_create(void (*task_entry)(void), uint8_t priority);  // Create a new task
+void scheduler(void);                                          // Task scheduler function
+void context_switch(task_t *prev_task, task_t *next_task);     // Perform a context switch
+void task_yield(void);                                         // Yield control to the scheduler
+static void idle_task(void);                                   // Idle task function
 
 // Task stacks and task array
-static uint8_t task_stacks[MAX_TASKS][STACK_SIZE];          // Memory for task stacks
-static task_t tasks[MAX_TASKS];                             // Array of task control blocks
-
-// Global variables
-extern uint32_t task_count;                                 // Number of created tasks
-extern uint32_t current_task;                               // Index of the currently running task
-
+static uint8_t task_stacks[MAX_TASKS][STACK_SIZE];             // Memory for task stacks
 #endif // SCHEDULER_H

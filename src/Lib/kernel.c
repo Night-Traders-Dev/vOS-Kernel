@@ -14,7 +14,6 @@ void shell_task(void) {
         } else {
             print_string("[kernel] No input received.\n");
         }
-
     }
 }
 
@@ -61,11 +60,15 @@ void kernel_entry(void) {
     print_string("\033[2J\033[H"); // Clear screen and reset cursor
     print_string("Welcome to vOS\n\n");
 
+    kernel_initialized = true;
+
+    // Start the shell task
+    task_create(shell_task, 5); // Example task with priority 5
 
     // Kernel main loop
-//    while (1) {
-//        task_yield(); // Let the task scheduler manage execution
-//    }
+    while (1) {
+        task_yield(); // Let the task scheduler manage execution
+    }
 }
 
 // UART read character (blocking)
@@ -127,8 +130,13 @@ void uart_read_string(char *buffer, int max_length, uint32_t timeout_ticks) {
 // System shutdown function
 void system_off(void) {
     print_string("[kernel] vOS Kernel Shutdown...\n");
+
+    // Platform-specific shutdown
+    #if defined(TARGET_QEMU)
     register const uint64_t function_id asm("x0") = QEMU_SHUTDOWN_PORT;
     asm volatile("hvc #0" :: "r"(function_id));
-    while (1)
-        asm("");
+    #else
+    print_string("[kernel] Shutdown not supported on this platform.\n");
+    while (1) {} // Infinite loop to halt execution
+    #endif
 }

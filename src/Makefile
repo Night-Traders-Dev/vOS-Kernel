@@ -7,6 +7,7 @@ CC = clang
 AS = aarch64-linux-gnu-as
 LD = aarch64-linux-gnu-ld
 CFLAGS = -ffreestanding -nostdlib -fpic -fno-stack-protector -I$(INCLUDE_DIR)
+LDFLAGS += -latomic
 
 BOOTLOADER = asm
 BOOT_SRC = $(BOOT_DIR)/boot.S

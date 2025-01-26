@@ -13,6 +13,11 @@
 #define TIMER_VAL   (*(volatile uint32_t *)(TIMER_BASE + 0x04))  // Current value register
 #define TIMER_CTRL  (*(volatile uint32_t *)(TIMER_BASE + 0x08))  // Control register
 
+#define TIMER_INTERRUPT_ID  30
+#define PRIORITY_HIGH       0x20
+#define TARGET_CPU_0        0x01
+#define EDGE_TRIGGER        0x2
+
 // Timer Control Register Bit Fields
 #define TIMER_CTRL_ENABLE_Msk      (1U << 0)  // Enable the timer
 #define TIMER_CTRL_MODE_Msk        (1U << 1)  // Timer mode (periodic or one-shot)

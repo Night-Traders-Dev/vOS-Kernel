@@ -60,9 +60,9 @@ void kernel_entry(void) {
     task_create(uart_task, 2);
     int shell_task_idx = task_create(shell_task, 1);
     void (*shell_task_entry)(void) = shell_task;
-//    if (timer_init()) {
-    execute_task_immediately(shell_task_entry);
-//    }
+    if (timer_init()) {
+        execute_task_immediately(shell_task_entry);
+    }
 }
 
 

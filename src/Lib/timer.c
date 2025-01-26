@@ -50,17 +50,9 @@ bool timer_init(void) {
         return false;
     }
 
-    // Check if the scheduler is initialized
-    if (!scheduler_initialized()) {
-        print_string("Error: Scheduler initialization failed. Halting.\n");
-        while (1) {
-            system_off();
-        }
-    }
     if ((TIMER_CTRL & TIMER_CTRL_ENABLE_Msk) != 0) {
+//        scheduler_initialized();
         print_string("Custom Timer Configured Successfully\n");
-        task_yield();
-        return true;
     }
     return true;
 }
@@ -70,15 +62,14 @@ void increment_system_ticks(void) {
     system_ticks++;
 }
 
-// Register the timer interrupt with the GIC
 void gic_register_timer_interrupt(void) {
-    uint32_t timer_interrupt_id = 30;  // Timer interrupt ID
-
-    // Configure the interrupt using the updated GIC functions
+    gic_init();
+    uint32_t timer_interrupt_id = 30;  // Timer interrupt ID (verify with GIC configuration)
     gic_enable_interrupt(timer_interrupt_id);
-    gic_set_priority(timer_interrupt_id, 0x20);  // Set priority (lower number = higher priority)
-    gic_set_target(timer_interrupt_id, 0x01);    // Target CPU (assuming single-core)
-    gic_set_config(timer_interrupt_id, 0x2);     // Set to edge-triggered
+    gic_set_priority(timer_interrupt_id, 0x20);  // Example priority
+    gic_set_target(timer_interrupt_id, 0x01);  // Target CPU 0 (for single-core)
+    gic_set_config(timer_interrupt_id, 0x2);  // 0x2 means edge-triggered
+    print_string("Timer interrupt registered and configured.\n");
 }
 
 // Timer interrupt handler

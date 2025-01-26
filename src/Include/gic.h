@@ -6,7 +6,7 @@
 #define WRITE_REG(addr, value)    (*(volatile uint32_t *)(uintptr_t)(addr) = (value))
 #define READ_REG(addr)            (*(volatile uint32_t *)(uintptr_t)(addr))
 
-#define WRITE_SYSREG(reg, value) asm volatile("msr " reg ", %0" : : "r" (value) : "memory")
+#define WRITE_SYSREG(reg, value) asm volatile("msr " reg ", %x0" : : "r" (value) : "memory")
 #define READ_SYSREG(reg, var) asm volatile("mrs %0, " reg : "=r" (var))
 
 
@@ -38,7 +38,7 @@
 #define GICD_CTLR_ENABLE  (1U << 0)  // Enable the distributor
 
 // Priority values for GIC
-#define GICC_PMR_PRIO_LOW (0xFF)  // Lowest priority value
+#define GICC_PMR_PRIO_LOW (0xFFULL)  // Lowest priority value
 
 // Function prototypes
 void gic_init(void);

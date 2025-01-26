@@ -30,6 +30,9 @@
 #define ICC_EOIR1_EL1     "S3_0_C12_C12_1"  // End of Interrupt Register
 #define ICC_IGRPEN1_EL1   "S3_0_C12_C12_7"  // Group 1 Interrupt Enable Register
 #define ICC_SRE_EL1       "S3_0_C12_C12_5"  // System Register Enable
+#define ICC_IGRPEN0_EL1     "S3_0_C12_C12_6"
+#define ICC_IGRPEN1_EL3     "S3_6_C12_C12_7"
+
 
 // GICD Control Register Value
 #define GICD_CTLR_ENABLE  (1U << 0)  // Enable the distributor

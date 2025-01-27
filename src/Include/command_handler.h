@@ -9,4 +9,6 @@
 #include "scheduler.h"
 
 void handle_command(const char *buffer);
+extern void clear(void);
+void cmd_help(void);
 #endif

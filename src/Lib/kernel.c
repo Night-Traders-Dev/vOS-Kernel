@@ -1,9 +1,5 @@
 #include "kernel.h"
 
-void timer_ISR(void) {
-    timer_interrupt_handler();
-}
-
 // Kernel tasks
 void shell_task(void) {
     char buffer[128];
@@ -62,7 +58,7 @@ void kernel_entry(void) {
         system_off();
     }
 
-//    print_string("\033[2J\033[H");
+    clear();
     print_string("Welcome to vOS\n\n");
 
     kernel_initialized = true;

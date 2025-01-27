@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdint.h>
 #include "heartbeat.h"
 
@@ -6,11 +7,27 @@
 volatile uint32_t tick_count = 0;
 static void delay_cycles(uint32_t cycles);
 
+
+
 void setup_timer_1ms(void (*timer_ISR)(void)) {
+    // Disable interrupts
+//    __asm__ volatile ("cpsid i");
+
+    // Use a simple software loop for a 1ms timer
     while (1) {
-        delay_cycles(CYCLES_PER_MS); // Wait for 1ms
-        timer_ISR();                // Call the user-defined ISR
+        for (uint32_t i = 0; i < 100000; i++) {
+            __asm__ volatile ("nop"); // Calibrated for 1ms
+        }
+        tick_count++;
+        timer_ISR();
     }
+
+    // Enable interrupts
+//    __asm__ volatile ("cpsie i");
+}
+
+void timer_ISR(void) {
+    __asm__ volatile ("nop");
 }
 
 static void delay_cycles(uint32_t cycles) {

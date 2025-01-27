@@ -6,7 +6,7 @@ INCLUDE_DIR = Include
 CC = clang
 AS = aarch64-linux-gnu-as
 LD = aarch64-linux-gnu-ld
-CFLAGS = -ffreestanding -nostdlib -fpic -fno-stack-protector -I$(INCLUDE_DIR)
+CFLAGS = -ffreestanding -nostdlib -fpic -fno-stack-protector -mcpu=cortex-a53 -march=armv8-a  -I$(INCLUDE_DIR)
 LDFLAGS += -latomic
 
 BOOTLOADER = asm

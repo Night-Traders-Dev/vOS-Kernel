@@ -2,44 +2,37 @@
 #include <stdint.h>
 #include "heartbeat.h"
 
-#define CPU_CLOCK_HZ 48000000
-#define CYCLES_PER_MS (CPU_CLOCK_HZ / 1000)
+#define CYCLES_PER_MS (get_cpu_freq() / 1000)
+
 volatile uint32_t tick_count = 0;
-static void delay_cycles(uint32_t cycles);
 
+static inline uint64_t read_cntvct(void) {
+    uint64_t val;
+    __asm__ volatile ("mrs %0, cntvct_el0" : "=r" (val));
+    return val;
+}
 
+static inline uint64_t get_cpu_freq(void) {
+    uint64_t freq;
+    __asm__ volatile ("mrs %0, cntfrq_el0" : "=r" (freq));
+    return freq;
+}
+
+static void delay_cycles(uint64_t cycles) {
+    uint64_t start = read_cntvct();
+    while ((read_cntvct() - start) < cycles);
+}
 
 void setup_timer_1ms(void (*timer_ISR)(void)) {
-    // Disable interrupts
-//    __asm__ volatile ("cpsid i");
-
-    // Use a simple software loop for a 1ms timer
     while (1) {
-        for (uint32_t i = 0; i < 100000; i++) {
-            __asm__ volatile ("nop"); // Calibrated for 1ms
-        }
+        delay_cycles(CYCLES_PER_MS);
         tick_count++;
         timer_ISR();
     }
-
-    // Enable interrupts
-//    __asm__ volatile ("cpsie i");
 }
 
 void timer_ISR(void) {
     __asm__ volatile ("nop");
-}
-
-static void delay_cycles(uint32_t cycles) {
-    uint32_t start, current;
-
-    // Read the cycle counter register at the start
-    __asm__ volatile ("mrs %0, cntvct_el0" : "=r" (start));
-
-    do {
-        // Read the current cycle counter value
-        __asm__ volatile ("mrs %0, cntvct_el0" : "=r" (current));
-    } while ((current - start) < cycles);
 }
 
 void timer_interrupt_handler(void) {

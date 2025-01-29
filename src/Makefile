@@ -33,7 +33,8 @@ endif
 clean:
 	@echo "Cleaning build files..." | tee -a dmesg
 	@date "+[%Y-%m-%d %H:%M:%S] Cleaning build files..." >> dmesg
-	rm -f $(OBJS) $(BUILD_DIR)/*
+	rm -f $(OBJS)
+	rm -rf $(BUILD_DIR)/*
 	@echo "Clean complete." | tee -a dmesg
 	@date "+[%Y-%m-%d %H:%M:%S] Clean complete." >> dmesg
 

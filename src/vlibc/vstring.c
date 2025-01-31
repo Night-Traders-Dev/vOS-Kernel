@@ -85,3 +85,26 @@ char* v_strncat(char* dest, const char* src, size_t n) {
 
     return dest;
 }
+
+char* v_strchr(const char* str, int c) {
+    while (*str) {
+        if (*str == (char)c) {
+            return (char*)str;
+        }
+        str++;
+    }
+    return NULL;  // Return NULL if character is not found
+}
+
+char* v_strrchr(const char* str, int c) {
+    const char* last_occurrence = NULL;
+
+    while (*str) {
+        if (*str == (char)c) {
+            last_occurrence = str; // Update last occurrence
+        }
+        str++;
+    }
+    
+    return (char*)last_occurrence;
+}

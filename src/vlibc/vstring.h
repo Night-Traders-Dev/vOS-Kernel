@@ -11,5 +11,7 @@ void *v_memcpy(void *dest, const void *src, size_t n);
 void *v_memset(void *s, int c, size_t n);
 char* v_strcat(char* dest, const char* src);
 char* v_strncat(char* dest, const char* src, size_t n);
+char* v_strchr(const char* str, int c);
+char* v_strrchr(const char* str, int c);
 
 #endif // VSTRING_H

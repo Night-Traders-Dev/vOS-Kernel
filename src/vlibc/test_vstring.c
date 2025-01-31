@@ -65,6 +65,40 @@ void test_v_strncat() {
 }
 
 
+void test_v_strchr() {
+    const char* test_str = "Hello, World!";
+    
+    printf("Testing v_strchr...\n");
+    printf("String: %s\n", test_str);
+
+    char* result = v_strchr(test_str, 'W');
+    printf("Searching for 'W': %s (Expected: World!)\n", result ? result : "NULL");
+
+    result = v_strchr(test_str, 'o');
+    printf("Searching for 'o': %s (Expected: o, World!)\n", result ? result : "NULL");
+
+    result = v_strchr(test_str, 'z');
+    printf("Searching for 'z': %s (Expected: NULL)\n\n", result ? result : "NULL");
+}
+
+
+void test_v_strrchr() {
+    const char* test_str = "Hello, World!";
+    
+    printf("Testing v_strrchr...\n");
+    printf("String: %s\n", test_str);
+
+    char* result = v_strrchr(test_str, 'o');
+    printf("Searching for last 'o': %s (Expected: orld!)\n", result ? result : "NULL");
+
+    result = v_strrchr(test_str, 'l');
+    printf("Searching for last 'l': %s (Expected: ld!)\n", result ? result : "NULL");
+
+    result = v_strrchr(test_str, 'z');
+    printf("Searching for 'z': %s (Expected: NULL)\n\n", result ? result : "NULL");
+}
+
+
 int main() {
     test_strlen();
     test_strcmp();
@@ -74,5 +108,7 @@ int main() {
     test_memset();
     test_v_strcat();
     test_v_strncat();
+    test_v_strchr();
+    test_v_strrchr();
     return 0;
 }

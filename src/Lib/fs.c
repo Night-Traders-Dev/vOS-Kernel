@@ -92,11 +92,19 @@ void fs_ls(void) {
     }
 }
 
-//int fs_cat(const char *filename) {
-//    char buffer[128];
-//    fs_read(filename, buffer, sizeof(buffer));
-//    syscall_print_string(filename);
-//    syscall_print_string(":\n");
-//    syscall_print_string(buffer);
-//    syscall_print_string("\n");
-//}
+void fs_cat(const char *filename) {
+    char buffer[MAX_FILE_SIZE + 1]; // Ensure space for null-terminator
+    int bytes_read = fs_read(filename, buffer, MAX_FILE_SIZE);
+
+    if (bytes_read == -1) {
+        print_string("[shell] Error: File not found or cannot be read.\n");
+        return;
+    }
+
+    buffer[bytes_read] = '\0'; // Ensure null termination
+    print_string("[shell] Contents of ");
+    print_string(filename);
+    print_string(":\n");
+    print_string(buffer);
+    print_string("\n");
+}

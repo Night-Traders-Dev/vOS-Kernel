@@ -1,5 +1,74 @@
 #include "vstring.h"
 
+
+size_t strlen(const char *str) {
+    size_t len = 0;
+    while (str[len] != '\0') {
+        len++;
+    }
+    return len;
+}
+
+void *memset(void *s, int c, size_t n) {
+    unsigned char *p = s;
+    while (n--) {
+        *p++ = (unsigned char)c;
+    }
+    return s;
+}
+
+static int isdigit(char c) {
+    return (c >= '0' && c <= '9');
+}
+
+static int isspace(char c) {
+    return (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f' || c == '\v');
+}
+
+int vosscanf(const char *str, const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    int matched = 0;
+
+    while (*format) {
+        if (*format == '%') {
+            format++;
+            if (*format == 'd') {  // Handle integer parsing
+                int *out = va_arg(args, int *);
+                *out = 0;
+                int sign = 1;
+
+                // Skip whitespace
+                while (*str && isspace(*str)) {
+                    str++;
+                }
+
+                // Handle sign
+                if (*str == '-') {
+                    sign = -1;
+                    str++;
+                } else if (*str == '+') {
+                    str++;
+                }
+
+                // Convert number
+                while (*str && isdigit(*str)) {
+                    *out = (*out * 10) + (*str - '0');
+                    str++;
+                }
+
+                *out *= sign;
+                matched++;
+            }
+        }
+        format++;
+    }
+
+    va_end(args);
+    return matched;
+}
+
+
 // Function to print a string to UART
 void print_string(const char *str) {
     while (*str) {

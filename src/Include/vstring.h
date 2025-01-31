@@ -3,10 +3,7 @@
 
 #include <stddef.h>
 #include <stdarg.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
-#include <stddef.h>
+//#include <string.h>
 #include <stdint.h>
 
 // UART Base Address and Registers
@@ -24,6 +21,7 @@ int strcmp(const char *str1, const char *str2);
 int strlength(const char *str);
 char *strcpy(char *dest, const char *src);
 char* int_to_string(int num, char *buffer);
-
-
+extern size_t strlen(const char *str);
+extern void *memset(void *s, int c, size_t n);
+extern int vosscanf(const char *str, const char *format, ...);
 #endif // VSTRING_H

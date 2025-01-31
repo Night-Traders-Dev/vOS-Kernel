@@ -108,3 +108,132 @@ char* v_strrchr(const char* str, int c) {
     
     return (char*)last_occurrence;
 }
+
+
+char* v_strstr(const char* haystack, const char* needle) {
+    if (!*needle) {
+        return (char*)haystack;  // Return haystack if needle is empty
+    }
+
+    while (*haystack) {
+        const char* h = haystack;
+        const char* n = needle;
+
+        while (*h && *n && (*h == *n)) {
+            h++;
+            n++;
+        }
+
+        if (!*n) {
+            return (char*)haystack;  // Found match
+        }
+
+        haystack++;
+    }
+
+    return NULL;  // No match found
+}
+
+char* v_strtok(char* str, const char* delim) {
+    static char* next_token = NULL;
+
+    if (str) {
+        next_token = str;
+    }
+
+    if (!next_token) {
+        return NULL;
+    }
+
+    // Skip leading delimiters
+    while (*next_token && v_strchr(delim, *next_token)) {
+        next_token++;
+    }
+
+    if (!*next_token) {
+        return NULL;
+    }
+
+    char* token_start = next_token;
+
+    // Find the end of the token
+    while (*next_token && !v_strchr(delim, *next_token)) {
+        next_token++;
+    }
+
+    if (*next_token) {
+        *next_token = '\0';
+        next_token++;
+    } else {
+        next_token = NULL;
+    }
+
+    return token_start;
+}
+
+int v_atoi(const char* str) {
+    int result = 0;
+    int sign = 1;
+
+    // Skip leading whitespace
+    while (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r' || *str == '\f' || *str == '\v') {
+        str++;
+    }
+
+    // Handle optional sign
+    if (*str == '-' || *str == '+') {
+        if (*str == '-') {
+            sign = -1;
+        }
+        str++;
+    }
+
+    // Convert characters to integer
+    while (*str >= '0' && *str <= '9') {
+        result = result * 10 + (*str - '0');
+        str++;
+    }
+
+    return result * sign;
+}
+
+void v_itoa(int num, char* str) {
+    int i = 0;
+    int is_negative = 0;
+
+    // Handle 0 explicitly
+    if (num == 0) {
+        str[i++] = '0';
+        str[i] = '\0';
+        return;
+    }
+
+    // Handle negative numbers
+    if (num < 0) {
+        is_negative = 1;
+        num = -num;
+    }
+
+    // Convert integer to string (in reverse order)
+    while (num > 0) {
+        str[i++] = (num % 10) + '0';
+        num /= 10;
+    }
+
+    // Add negative sign if necessary
+    if (is_negative) {
+        str[i++] = '-';
+    }
+
+    str[i] = '\0';
+
+    // Reverse the string
+    int start = 0, end = i - 1;
+    while (start < end) {
+        char temp = str[start];
+        str[start] = str[end];
+        str[end] = temp;
+        start++;
+        end--;
+    }
+}

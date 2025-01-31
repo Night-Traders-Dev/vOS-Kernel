@@ -98,6 +98,70 @@ void test_v_strrchr() {
     printf("Searching for 'z': %s (Expected: NULL)\n\n", result ? result : "NULL");
 }
 
+void test_v_strstr() {
+    const char* test_str = "Hello, World!";
+
+    printf("Testing v_strstr...\n");
+    printf("String: %s\n", test_str);
+
+    char* result = v_strstr(test_str, "World");
+    printf("Searching for 'World': %s (Expected: World!)\n", result ? result : "NULL");
+
+    result = v_strstr(test_str, "Hello");
+    printf("Searching for 'Hello': %s (Expected: Hello, World!)\n", result ? result : "NULL");
+
+    result = v_strstr(test_str, "!");
+    printf("Searching for '!': %s (Expected: !)\n", result ? result : "NULL");
+
+    result = v_strstr(test_str, "xyz");
+    printf("Searching for 'xyz': %s (Expected: NULL)\n\n", result ? result : "NULL");
+}
+
+void test_v_strtok() {
+    char test_str[] = "Hello,World,This,Is,vOS";
+    const char* delim = ",";
+
+    printf("Testing v_strtok...\n");
+
+    char* token = v_strtok(test_str, delim);
+    while (token) {
+        printf("Token: %s\n", token);
+        token = v_strtok(NULL, delim);
+    }
+}
+
+void test_v_atoi() {
+    printf("Testing v_atoi...\n");
+    
+    printf("v_atoi(\"123\"): %d (Expected: 123)\n", v_atoi("123"));
+    printf("v_atoi(\"   456\"): %d (Expected: 456)\n", v_atoi("   456"));
+    printf("v_atoi(\"-789\"): %d (Expected: -789)\n", v_atoi("-789"));
+    printf("v_atoi(\"+42\"): %d (Expected: 42)\n", v_atoi("+42"));
+    printf("v_atoi(\"0\"): %d (Expected: 0)\n", v_atoi("0"));
+    printf("v_atoi(\"999999\"): %d (Expected: 999999)\n", v_atoi("999999"));
+    printf("v_atoi(\"notanumber\"): %d (Expected: 0)\n", v_atoi("notanumber"));
+}
+
+void test_v_itoa() {
+    char buffer[20];
+
+    printf("Testing v_itoa...\n");
+
+    v_itoa(123, buffer);
+    printf("v_itoa(123): %s (Expected: \"123\")\n", buffer);
+
+    v_itoa(0, buffer);
+    printf("v_itoa(0): %s (Expected: \"0\")\n", buffer);
+
+    v_itoa(-456, buffer);
+    printf("v_itoa(-456): %s (Expected: \"-456\")\n", buffer);
+
+    v_itoa(7890, buffer);
+    printf("v_itoa(7890): %s (Expected: \"7890\")\n", buffer);
+
+    v_itoa(-2147483648, buffer); // Edge case for 32-bit int
+    printf("v_itoa(-2147483648): %s (Expected: \"-2147483648\")\n", buffer);
+}
 
 int main() {
     test_strlen();
@@ -110,5 +174,9 @@ int main() {
     test_v_strncat();
     test_v_strchr();
     test_v_strrchr();
+    test_v_strstr();
+    test_v_strtok();
+    test_v_atoi();
+    test_v_itoa();
     return 0;
 }

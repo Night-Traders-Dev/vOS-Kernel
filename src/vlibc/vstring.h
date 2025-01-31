@@ -13,5 +13,9 @@ char* v_strcat(char* dest, const char* src);
 char* v_strncat(char* dest, const char* src, size_t n);
 char* v_strchr(const char* str, int c);
 char* v_strrchr(const char* str, int c);
+char* v_strstr(const char* haystack, const char* needle);
+char* v_strtok(char* str, const char* delim);
+int v_atoi(const char* str);
+void v_itoa(int num, char* str);
 
 #endif // VSTRING_H
